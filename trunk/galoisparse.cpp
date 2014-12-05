@@ -132,7 +132,8 @@ int main() {
    		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
      		cout <<" dest: "<< g.getData(dst).label_type;
-     		//int edgeData = g.getEdgeData(jj);
+     		int edgeData = g.getEdgeData(edge);
+     		cout << " edge data " << edgeData;
      		//assert(edgeData == 5);
    		}
 	   	cout <<endl;
