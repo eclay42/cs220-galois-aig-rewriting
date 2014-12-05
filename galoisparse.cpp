@@ -78,7 +78,7 @@ int main() {
 	    			//remove last char b/c its ',' or ';'
 	    			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
 	    			gnodes[node_index] = g.createNode(nodes[node_index]);
-				
+				g.addNode(gnodes[node_index]);				
 
 	    			node_index++;
 	    		}
@@ -119,7 +119,7 @@ int main() {
 
 	  }
 
-	cout << g.getData(gnodes[0]).label_type << endl;
+	//cout << g.getData(gnodes[0]).label_type << endl;
 	// Traverse graph
  	for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
    		Graph::GraphNode src = *ii;
