@@ -38,7 +38,7 @@ int main() {
 	vector<string> fields;
 
 	ifstream fin;
-	fin.open("/home/aditya/CS_220/alan-abc/examples/sk"); // open a file
+	fin.open("/home/alex/Downloads/test.v"); // open a file
 	if (!fin.good()){
 		cout << "file not found\n";
 	    return 1; // exit if file not found
@@ -58,63 +58,67 @@ int main() {
 	    		//add to hash map to index to corresponding node in array
 	    		if(fields[i].size()>1)
 	    		{
-				//Add data to each node for level and type of input
- 				if(fields[0].compare("input") == 0)
-				{
-					nodes[node_index].type = pi;
-					nodes[node_index].level = 0;
-					nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-				if(fields[0].compare("output") == 0)
-				{
-					nodes[node_index].type = po;
-					nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-				if(fields[0].compare("wire") == 0)
-				{
-					nodes[node_index].type = nd;
-					nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-	    			//remove last char b/c its ',' or ';'
-	    			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
-	    			gnodes[node_index] = g.createNode(nodes[node_index]);
-				g.addNode(gnodes[node_index]);				
+					//Add data to each node for level and type of input
+					if(fields[0].compare("input") == 0)
+					{
+						nodes[node_index].type = pi;
+						nodes[node_index].level = 0;
+						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+					}
+					if(fields[0].compare("output") == 0)
+					{
+						nodes[node_index].type = po;
+						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+					}
+					if(fields[0].compare("wire") == 0)
+					{
+						nodes[node_index].type = nd;
+						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+					}
+					//remove last char b/c its ',' or ';'
+					map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+					gnodes[node_index] = g.createNode(nodes[node_index]);
 
-	    			node_index++;
+					g.addNode(gnodes[node_index]);
+
+					node_index++;
 	    		}
 
 	    	}
 	    }
 	    if(fields[0].compare("assign") == 0)
 	    {
-	    	size_t invert = fields[3].find_first_of("~");
-		if(fields[4].compare("|") == 0)
-		{
-			g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 2;//Edge weight: 2- Negative 1 - Positive
-			g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[3].length()-1)]],gnodes[map[fields[1]]])) = 2;
-			nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData() 
-		}
 
-		else{	
-	    	if (invert != string::npos){
-	    		//addEdge(src,dest)
-	    		//remove the '~' from the start of string
-	    		//map[string] returns node index to find which node 
-	    		g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 2;// 
-	    		//TODO add edge weights
-	    	}
-		else 
-			g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 1;
+			if(fields[4].compare("|") == 0)
+			{	//Edge weight: 2- Negative 1 - Positive
+				g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(0,fields[3].length())]]//src
+											   ,gnodes[map[fields[1]]])) = 2;//dest
+				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]
+											   ,gnodes[map[fields[1]]])) = 2;
+				nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData()
+			}
 
-	    	invert = fields[5].find_first_of("~");
-	    	if (invert != string::npos){
-	    		//remove first and last char b/c '~' to start and ';' at th
-	    		g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[3].length()-1)]],gnodes[map[fields[1]]])) = 2;
-	    	}
-		else
-			g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[3].length()-1)]],gnodes[map[fields[1]]])) = 1;
-		}
-
+			else
+			{	size_t invert = fields[3].find_first_of("~");
+				if (invert != string::npos){
+					//addEdge(src,dest)
+					//remove the '~' from the start of string
+					//map[string] returns node index to find which node
+					g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 2;//
+				}
+				else{
+					g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(0,fields[3].length())]],gnodes[map[fields[1]]])) = 1;
+				}
+				invert = fields[5].find_first_of("~");
+				if (invert != string::npos){
+					//remove first and last char b/c '~' to start and ';' at th
+					//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
+					g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[5].length()-2)]],gnodes[map[fields[1]]])) = 2;
+				}
+				else{
+					g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]],gnodes[map[fields[1]]])) = 1;
+				}
+			}
 	    }
 
 	  }
@@ -123,20 +127,23 @@ int main() {
 	// Traverse graph
  	for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
    		Graph::GraphNode src = *ii;
-		cout << g.getData(src).label_type << endl;
-	   	//for (Graph::edge_iterator jj = g.edge_begin(src), ej = g.edge_end(src); ++jj) {
-     		//Graph::GraphNode dst = graph.getEdgeDst(jj);
+		cout <<"src: "<< g.getData(src).label_type ;
+
+   		for (Graph::edge_iterator edge : g.out_edges(src)) {
+   			Graph::GraphNode dst = g.getEdgeDst(edge);
+     		cout <<" dest: "<< g.getData(dst).label_type;
      		//int edgeData = g.getEdgeData(jj);
      		//assert(edgeData == 5);
-   		//}
+   		}
+	   	cout <<endl;
  	}
 /*
 	for (Graph::GraphNode src : g) {
-   	for (Graph::edge_iterator edge : g.out_edges(src)) {
-     		Graph::GraphNode dst = g.getEdgeDst(edge);
-     		int edgeData = g.getEdgeData(edge);
-     		cout << (g.getData(src)).label_type << "\n";
-   		}
+		for (Graph::edge_iterator edge : g.out_edges(src)) {
+			Graph::GraphNode dst = g.getEdgeDst(edge);
+			int edgeData = g.getEdgeData(edge);
+			cout << (g.getData(src)).label_type << "\n";
+			}
  	}	
 */
 
