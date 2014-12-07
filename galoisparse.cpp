@@ -51,7 +51,7 @@ int main() {
 	    getline(fin,line);
 	    trim(line);
 	    split(fields, line, is_any_of(" "));
-
+	    Node n;
 	    if(fields[0].compare("input") == 0 || fields[0].compare("output") == 0||fields[0].compare("wire") == 0)
 	    {
 	    	for(unsigned i =1;i<fields.size();i++){
@@ -61,25 +61,34 @@ int main() {
 					//Add data to each node for level and type of input
 					if(fields[0].compare("input") == 0)
 					{
-						nodes[node_index].type = pi;
-						nodes[node_index].level = 0;
-						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+						n.type = pi;
+						n.level = 0;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+
+						//nodes[node_index].type = pi;
+						//nodes[node_index].level = 0;
+						//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 					}
 					if(fields[0].compare("output") == 0)
 					{
-						nodes[node_index].type = po;
-						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+						n.type = po;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+						//nodes[node_index].type = po;
+						//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 					}
 					if(fields[0].compare("wire") == 0)
 					{
-						nodes[node_index].type = nd;
-						nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
+						n.type = nd;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+						//nodes[node_index].type = nd;
+						//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 					}
 					//remove last char b/c its ',' or ';'
 					map[fields[i].substr(0,fields[i].length()-1)] = node_index;
-					gnodes[node_index] = g.createNode(nodes[node_index]);
+					//gnodes[node_index] = g.createNode(nodes[node_index]);
+					gnodes.push_back(g.createNode(n));
 
-					g.addNode(gnodes[node_index]);
+					g.addNode(gnodes[gnodes.size()-1]);
 
 					node_index++;
 	    		}
@@ -95,6 +104,7 @@ int main() {
 											   ,gnodes[map[fields[1]]])) = 2;//dest
 				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]
 											   ,gnodes[map[fields[1]]])) = 2;
+				//needs to be inproved doesnt work i think -alex
 				nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData()
 			}
 
