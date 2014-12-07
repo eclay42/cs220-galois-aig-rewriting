@@ -11,7 +11,6 @@
 #include <fstream>
 using namespace std;
 using namespace boost;
-#define MAX_NODES 10000
 
 typedef enum{pi,po,nd} node_type;
 
@@ -32,8 +31,8 @@ int main() {
 	typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 
 	Graph g;
-	Node nodes[MAX_NODES];
-	Graph::GraphNode gnodes[MAX_NODES];
+	//vector<Node> nodes;
+	vector<Graph::GraphNode> gnodes;
 
 	vector<string> fields;
 
@@ -89,12 +88,13 @@ int main() {
 					gnodes.push_back(g.createNode(n));
 
 					g.addNode(gnodes[gnodes.size()-1]);
-
+					//cout << "node index: "<< node_index<<endl;
 					node_index++;
 	    		}
 
 	    	}
 	    }
+	    //cout <<"compare assign"<<endl;
 	    if(fields[0].compare("assign") == 0)
 	    {
 
@@ -105,7 +105,7 @@ int main() {
 				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]
 											   ,gnodes[map[fields[1]]])) = 2;
 				//needs to be inproved doesnt work i think -alex
-				nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData()
+				//nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData()
 			}
 
 			else
@@ -148,26 +148,6 @@ int main() {
    		}
 	   	cout <<endl;
  	}
-/*
-	for (Graph::GraphNode src : g) {
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-			Graph::GraphNode dst = g.getEdgeDst(edge);
-			int edgeData = g.getEdgeData(edge);
-			cout << (g.getData(src)).label_type << "\n";
-			}
- 	}	
-*/
-
-
-/*
-	  for(unsigned i = 0; i<map.bucket_count();i++){
-		  std::cout << "bucket #" << i << " contains:";
-		      for ( auto local_it = map.begin(i); local_it!= map.end(i); ++local_it )
-		        std::cout << " " << local_it->first << ":" << local_it->second;
-		      std::cout << std::endl;
-	  }
-	  */
-	  //cout << map["n12,"]<<"\n"<<map["n11,"];
 
 	return 0;
 }
