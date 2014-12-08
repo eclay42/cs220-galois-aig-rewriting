@@ -8,7 +8,20 @@
 
 using namespace std;
 
-typedef Galois::Graph::FirstGraph<std::string,std::string,true> Graph;
+//typedef Galois::Graph::FirstGraph<std::string,std::string,true> Graph;
+
+
+typedef enum{pi,po,nd} node_type;
+
+struct Node {
+ string label_type;//a0,b0...
+ node_type type;// pi,po,nd
+ int fanins;
+ bool fanout; 
+ int level;
+ };
+ 
+typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 
 int main(int argc, char** argv) {
 
@@ -17,16 +30,25 @@ int main(int argc, char** argv) {
    *
    */
   Graph g;
-  std::string vn1, vn2, vn3, vn4, vn5, vn6, vn7, vn8;
+  Node vn1, vn2, vn3, vn4, vn5, vn6, vn7, vn8;
   Graph::GraphNode n1, n2, n3, n4, n5, n6, n7, n8;
 
   /*
    * Label vertices
    */
-  vn1 = "a";
-  vn2 = "b";
-  vn3 = "a";
-  vn4 = "c";
+   
+  // primary inputs
+  vn1.type = pi; vn2.type = pi; vn3.type = pi; 
+  vn1.level = 0; vn2.level = 0; vn3.level = 0;
+  vn1.label_type = "a0"; vn2.label_type = "a1"; vn3.label_type = "a2";
+  
+  // intermediate nodes
+  vn4.type = nd; vn5.type = nd; vn6.type = nd;
+  vn4.level = 1; vn5.level = 1; vn6.level = 2;
+  vn4.label_type = "n0"; vn5.label_type = "n1"; vn6.label_type = "n2"; 
+  
+  // primary output
+  vn7.type = po; vn7.level = 3; vn7.label_type = "s0";
 
   /*
    * Create vertices
@@ -38,7 +60,6 @@ int main(int argc, char** argv) {
   n5 = g.createNode(vn5);
   n6 = g.createNode(vn6);
   n7 = g.createNode(vn7);
-  n8 = g.createNode(vn8);
 
   g.addNode(n1);
   g.addNode(n2);
@@ -47,33 +68,82 @@ int main(int argc, char** argv) {
   g.addNode(n5);
   g.addNode(n6);
   g.addNode(n7);
-  g.addNode(n8);
 
   /*
    * Create edges
    */
-  g.getEdgeData(g.addEdge(n1, n5)) = "x";
-  g.getEdgeData(g.addEdge(n2, n5)) = "x";
+  g.getEdgeData(g.addEdge(n1, n4)) = 1; // a0->n0
+  g.getEdgeData(g.addEdge(n4, n1)) = 3; // n0->a0 (back edge)
+  g.getEdgeData(g.addEdge(n1, n5)) = 1; // a0->n1
+  g.getEdgeData(g.addEdge(n5, n1)) = 3; // n1->a0 (back edge)
 
-  g.getEdgeData(g.addEdge(n3, n6)) = "x";
-  g.getEdgeData(g.addEdge(n4, n6)) = "x";
-
-  g.getEdgeData(g.addEdge(n5, n7)) = "x";
-  g.getEdgeData(g.addEdge(n6, n7)) = "x";
-
-  g.getEdgeData(g.addEdge(n7, n8)) = "x";
+  g.getEdgeData(g.addEdge(n2, n4)) = 1; // a1->n0
+  g.getEdgeData(g.addEdge(n4, n2)) = 3; // n0->a1 (back edge)
   
+  g.getEdgeData(g.addEdge(n3, n5)) = 1; // a2->n1
+  g.getEdgeData(g.addEdge(n5, n3)) = 3; // n1->a2 (back edge)
+
+  g.getEdgeData(g.addEdge(n4, n6)) = 1; // n0->n2
+  g.getEdgeData(g.addEdge(n6, n4)) = 3; // n2->n0 (back edge)
+  
+  g.getEdgeData(g.addEdge(n5, n6)) = 1; // n1->n2
+  g.getEdgeData(g.addEdge(n6, n5)) = 3; // n2->n1 (back edge)
+
+  g.getEdgeData(g.addEdge(n6, n7)) = 1; // n2->s0
+  g.getEdgeData(g.addEdge(n7, n6)) = 3; // s0->n2 (back edge)
+  
+  // print graph
   for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
     Graph::GraphNode src = *ii;
-    cout << g.getData(src);
+    cout << "node: " << g.getData(src).label_type;
     cout << endl;
-    for (Graph::edge_iterator jj = g.edge_begin(src), ej = g.edge_end(src); ++jj) {
-      Graph::GraphNode dst = graph.getEdgeDst(jj);
-      cout << g.getEdgeData(jj);
+    for (Graph::edge_iterator jj = g.edge_begin(src), ej = g.edge_end(src); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int e = g.getEdgeData(jj);
+      if ( e == 1 )
+        cout << "Forward noninverted edge to ";
+      else if ( e == 2 )
+        cout << "Forward inverted edge to ";
+      else
+        cout << "Back edge to ";
+      
+      cout << g.getData(dst).label_type << endl;
+      //cout << "edge weight: " << g.getEdgeData(jj);
+      //cout << endl;
     }
+    cout << endl;
   }
   cout << endl;
+  
+  /*
+   *  Algorithm
+   */
 
+  for (Graph::iterator ii = g.begin(), ei = g.end(); ++ii) {
+    Graph::GraphNode top = **ii; // node we are attempting to build the cut from (top of the pyramid)
+    Graph::GraphNode left = NULL, right = NULL, input1 = NULL, input2 = NULL, input3 = NULL, input4 = NULL;
+    if ( g.getData(src).type != np )
+      continue; // move to the next node if the top node is a primary input or output
+    
+    for (Graph::edge_iterator jj = g.edge_begin(top), ej = g.edge_end(top); jj != ej; ++jj) {
+      // look for the back edges and follow them back to the input nodes to generate our cut
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int e = g.getEdgeData(jj);
+      if ( e == 3 ) {
+        if ( left == NULL )
+          left = dst;
+        else if ( right == NULL )
+          right = dst;
+        else {
+          cerr << "Error: node " << g.getData(top).label_type << " has more than two inputs\n"; exit; }
+      }
+    }
+    if ( input1 == NULL || input2 == NULL ) {
+      cerr << "Error: node " << g.getData(top).label_type << " does not have two inputs\n"; exit; }
+      
+    for (Graph::edge_iterator jj = g.edge_begin(left), ej = g.edge_end(left); jj != ej; ++jj) {
+      
+    
   return 0;
 }
 
