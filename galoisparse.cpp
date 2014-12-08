@@ -17,8 +17,8 @@ typedef enum{pi,po,nd} node_type;
 struct Node {
  string label_type;//a0,b0...
  node_type type;// pi,po,nd
- int fanins;
- bool fanout; 
+ int fanins; // Not required as of now
+ bool fanout; //Not required as of now
  int level;
  };
 
@@ -37,7 +37,7 @@ int main() {
 	vector<string> fields;
 
 	ifstream fin;
-	fin.open("/home/alex/Downloads/test.v"); // open a file
+	fin.open("/home/aditya/CS_220/alan-abc/examples/sk"); // open a file
 	if (!fin.good()){
 		cout << "file not found\n";
 	    return 1; // exit if file not found
@@ -71,6 +71,7 @@ int main() {
 					if(fields[0].compare("output") == 0)
 					{
 						n.type = po;
+						n.level = -1;
 						n.label_type = fields[i].substr(0,fields[i].length()-1);
 						//nodes[node_index].type = po;
 						//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
@@ -78,6 +79,7 @@ int main() {
 					if(fields[0].compare("wire") == 0)
 					{
 						n.type = nd;
+						n.level = -2;
 						n.label_type = fields[i].substr(0,fields[i].length()-1);
 						//nodes[node_index].type = nd;
 						//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
@@ -97,6 +99,7 @@ int main() {
 	    //cout <<"compare assign"<<endl;
 	    if(fields[0].compare("assign") == 0)
 	    {
+		int level1,level2;		
 
 			if(fields[4].compare("|") == 0)
 			{	//Edge weight: 2- Negative 1 - Positive
@@ -104,8 +107,13 @@ int main() {
 											   ,gnodes[map[fields[1]]])) = 2;//dest
 				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]
 											   ,gnodes[map[fields[1]]])) = 2;
-				//needs to be inproved doesnt work i think -alex
-				//nodes[map[fields[1]]].fanout = 0;// TO DO: Negated output: Try using getData()
+	
+				level1 = g.getData(gnodes[map[fields[3].substr(0,fields[3].length())]]).level;
+				level2 = g.getData(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+					      gnodes[map[fields[3].substr(0,fields[3].length())]])) = 3;//back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+					      gnodes[map[fields[5].substr(0,fields[5].length())]])) = 3;//back edges to determins fanins -> wt. = 3 
 			}
 
 			else
@@ -115,20 +123,38 @@ int main() {
 					//remove the '~' from the start of string
 					//map[string] returns node index to find which node
 					g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 2;//
+					level1 = g.getData(gnodes[map[fields[3].substr(1,fields[3].length())]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+					              gnodes[map[fields[3].substr(1,fields[3].length())]])) = 3;// Back edges to determine fanins -> wt. = 3
 				}
 				else{
 					g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(0,fields[3].length())]],gnodes[map[fields[1]]])) = 1;
+					level1 = g.getData(gnodes[map[fields[3].substr(0,fields[3].length())]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+						      gnodes[map[fields[3].substr(0,fields[3].length())]])) = 3;// Back edges to determine fanins -> wt. = 3
+					
 				}
 				invert = fields[5].find_first_of("~");
 				if (invert != string::npos){
 					//remove first and last char b/c '~' to start and ';' at th
 					//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
 					g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[5].length()-2)]],gnodes[map[fields[1]]])) = 2;
+					level2 = g.getData(gnodes[map[fields[5].substr(1,fields[5].length()-2)]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+						      gnodes[map[fields[5].substr(1,fields[5].length()-2)]])) = 3;// Back edges to determine fanins -> wt. = 3
 				}
 				else{
 					g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]],gnodes[map[fields[1]]])) = 1;
+					level2 = g.getData(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
+						      gnodes[map[fields[5].substr(0,fields[5].length()-1)]])) = 3;// Back edges to determine fanins -> wt. = 3
 				}
 			}
+		
+		if(level1>=level2)
+			g.getData(gnodes[map[fields[1]]]).level= level1+1;
+		else
+			g.getData(gnodes[map[fields[1]]]).level= level2+1;		
 	    }
 
 	  }
@@ -137,8 +163,8 @@ int main() {
 	// Traverse graph
  	for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
    		Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type ;
-
+		cout <<"src: "<< g.getData(src).label_type;
+		cout <<"src: level"<<g.getData(src).level;
    		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
      		cout <<" dest: "<< g.getData(dst).label_type;
