@@ -22,7 +22,7 @@ struct Node {
  int level;
  };
 
-int main() {
+int main(int argc, char *argv[]) {
 
 	unordered_map <string, int> map;
 	//unordered_map<string, int> map;
@@ -37,11 +37,15 @@ int main() {
 	vector<string> fields;
 
 	ifstream fin;
-	fin.open("/home/aditya/CS_220/alan-abc/examples/sk"); // open a file
-	if (!fin.good()){
-		cout << "file not found\n";
-	    return 1; // exit if file not found
-	}
+
+	if ( argc != 2 )
+    		cout<<"usage: "<< argv[0] <<" <filename>\n";
+  	else 
+		fin.open(argv[1]); // open a file
+		if (!fin.good()){
+			cout << "file not found\n";
+	    		return 1; // exit if file not found
+		}
 	  // read each line of the file
 	  while (!fin.eof())
 	  {
