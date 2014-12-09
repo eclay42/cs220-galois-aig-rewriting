@@ -122,12 +122,17 @@ int main(int argc, char** argv) {
   for (Graph::iterator ii = g.begin(), ei = g.end(); ++ii) {
     Graph::GraphNode top = **ii; // node we are attempting to build the cut from (top of the pyramid)
     Graph::GraphNode left = NULL, right = NULL, input1 = NULL, input2 = NULL, input3 = NULL, input4 = NULL;
-    if ( g.getData(src).type != np )
-      continue; // move to the next node if the top node is a primary input or output
+    Graph::GraphNode output = NULL;
+    if ( g.getData(src).type != np ) {
+      nextcut:
+      continue; } // move to the next node if a node is a primary input or output
     
     for (Graph::edge_iterator jj = g.edge_begin(top), ej = g.edge_end(top); jj != ej; ++jj) {
       // look for the back edges and follow them back to the input nodes to generate our cut
       Graph::GraphNode dst = g.getEdgeDst(jj);
+      if ( g.getData(dst).type != nd )
+        goto nextcut; // bail out if we find a primary input or output
+      
       int e = g.getEdgeData(jj);
       if ( e == 3 ) {
         if ( left == NULL )
@@ -138,11 +143,42 @@ int main(int argc, char** argv) {
           cerr << "Error: node " << g.getData(top).label_type << " has more than two inputs\n"; exit; }
       }
     }
-    if ( input1 == NULL || input2 == NULL ) {
+    if ( left == NULL || right == NULL ) {
       cerr << "Error: node " << g.getData(top).label_type << " does not have two inputs\n"; exit; }
       
+    int left_edge, right_edge;
+    // find the edges leading back to the top node and the input edges
     for (Graph::edge_iterator jj = g.edge_begin(left), ej = g.edge_end(left); jj != ej; ++jj) {
-      
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int e = g.getEdgeData(jj);
+      if ( dst == top )
+        left_edge = e;
+      else if ( e == 3 ) {
+        if ( input1 == NULL )
+          input1 = dst;
+        else if ( input2 == NULL )
+          input2 = dst;
+        else {
+          cerr << "Error: node " << g.getData(left).label_type << " has more than two inputs\n"; exit; }
+      } 
+    }
+    
+    for (Graph::edge_iterator jj = g.edge_begin(right), ej = g.edge_end(right); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int e = g.getEdgeData(jj);
+      if ( dst == top )
+        right_edge = e;
+      else if ( e == 3 ) {
+        if ( input3 == NULL )
+          input1 = dst;
+        else if ( input2 == NULL )
+          input4 = dst;
+        else {
+          cerr << "Error: node " << g.getData(left).label_type << " has more than two inputs\n"; exit; }
+      } 
+    }
+    
+    
     
   return 0;
 }
