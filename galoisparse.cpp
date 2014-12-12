@@ -22,6 +22,7 @@ struct Node {
  int level;
  };
 
+
 int main(int argc, char *argv[]) {
 
 	unordered_map <string, int> map;
