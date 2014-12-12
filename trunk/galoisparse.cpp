@@ -22,6 +22,23 @@ struct Node {
  int level;
  };
 
+typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
+
+Graph g;
+
+bool checkWorkability(Graph::GraphNode gnode){
+	int count = 0;
+	for (Graph::edge_iterator edge : g.out_edges(gnode)) {
+		int edgedata = g.getEdgeData(edge);
+	   	if(edgedata == 1|| edgedata ==2)
+	   		count++;
+	   	}
+	if (count > 1)
+		return false;
+	else
+		return true;
+}
+
 
 int main(int argc, char *argv[]) {
 
@@ -29,9 +46,7 @@ int main(int argc, char *argv[]) {
 	//unordered_map<string, int> map;
 	int node_index = 0;
 
-	typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 
-	Graph g;
 	//vector<Node> nodes;
 	vector<Graph::GraphNode> gnodes;
 
@@ -179,6 +194,10 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
+ 	if(checkWorkability(gnodes[map["n15"]]))
+ 		cout << "1 output"<<endl;
+ 	else
+ 		cout <<"more than 1 output"<<endl;
 
 	return 0;
 }

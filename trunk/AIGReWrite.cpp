@@ -24,19 +24,6 @@ struct Node {
 typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 Graph g;
 
-bool checkWorkability(Graph::GraphNode gnode){
-	int count = 0;
-	for (Graph::edge_iterator edge : g.out_edges(gnode)) {
-		int edgedata = g.getEdgeData(edge);
-	   	if(edgedata == 1|| edgedata ==2)
-	   		count++;
-	   	}
-	if (count > 1)
-		return false;
-	else
-		return true;
-}
-
 
 int main(int argc, char** argv) {
 
