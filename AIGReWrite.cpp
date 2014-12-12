@@ -198,7 +198,7 @@ int main(int argc, char** argv) {
     }
     
     cout << "\nCut:\n";
-    cout << "Output(s) = ";
+    cout << "Output(s) = "; cout << endl;
     cout << "Top = " << g.getData(top).label_type << endl;
     cout << "Left = " << g.getData(left).label_type << endl;
     cout << "Right = " << g.getData(left).label_type << endl;
