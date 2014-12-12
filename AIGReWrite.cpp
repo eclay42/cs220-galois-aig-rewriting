@@ -119,67 +119,98 @@ int main(int argc, char** argv) {
    *  Algorithm
    */
 
-  for (Graph::iterator ii = g.begin(), ei = g.end(); ++ii) {
-    Graph::GraphNode top = **ii; // node we are attempting to build the cut from (top of the pyramid)
+  cout << "Begin Algorithm:\n";
+
+  for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
+    Graph::GraphNode top = *ii; // node we are attempting to build the cut from (top of the pyramid)
     Graph::GraphNode left = NULL, right = NULL, input1 = NULL, input2 = NULL, input3 = NULL, input4 = NULL;
     Graph::GraphNode output = NULL;
-    if ( g.getData(src).type != np ) {
+    cout << "Checking node " << g.getData(top).label_type << endl;
+    if ( g.getData(top).type != nd ) {
+      cout << "Node is not nd type\n";
       nextcut:
+      cout << "Moving to next node\n\n";
       continue; } // move to the next node if a node is a primary input or output
-    
+      
+    cout << "Checking edges for top node\n";
     for (Graph::edge_iterator jj = g.edge_begin(top), ej = g.edge_end(top); jj != ej; ++jj) {
       // look for the back edges and follow them back to the input nodes to generate our cut
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      if ( g.getData(dst).type != nd )
-        goto nextcut; // bail out if we find a primary input or output
-      
-      int e = g.getEdgeData(jj);
-      if ( e == 3 ) {
-        if ( left == NULL )
-          left = dst;
-        else if ( right == NULL )
-          right = dst;
+      int ew = g.getEdgeData(jj);
+      cout << "Found edge of weight " << ew << " to node " << g.getData(dst).label_type << endl;
+      if ( ew == 3 ) {
+        if ( g.getData(dst).type != nd ) {
+          cout << "Left or right node is not nd type\n";
+          goto nextcut; }// bail out if we find a primary input or output
+        else if ( left == NULL ) {
+          left = dst; cout << "left = " << g.getData(left).label_type << endl; }
+        else if ( right == NULL ) {
+          right = dst; cout << "right = " << g.getData(right).label_type << endl; }
         else {
           cerr << "Error: node " << g.getData(top).label_type << " has more than two inputs\n"; exit; }
       }
+      else { // build list of outputs
+        }
     }
     if ( left == NULL || right == NULL ) {
       cerr << "Error: node " << g.getData(top).label_type << " does not have two inputs\n"; exit; }
       
+    //cout << "Found nodes " << g.getData(left).label_type << " and " << g.getData(right).label_type << endl;
+      
     int left_edge, right_edge;
     // find the edges leading back to the top node and the input edges
+    cout << "Checking edges for left node\n";
     for (Graph::edge_iterator jj = g.edge_begin(left), ej = g.edge_end(left); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int e = g.getEdgeData(jj);
-      if ( dst == top )
-        left_edge = e;
-      else if ( e == 3 ) {
-        if ( input1 == NULL )
-          input1 = dst;
-        else if ( input2 == NULL )
-          input2 = dst;
+      int ew = g.getEdgeData(jj);
+      cout << "Found edge of weight " << ew << " to node " << g.getData(dst).label_type << endl;
+      if ( dst == top ) {
+        left_edge = ew; cout << "left_edge = " << left_edge << endl; }
+      else if ( ew == 3 ) {
+        if ( input1 == NULL ) {
+          input1 = dst; cout << "input1 = " << g.getData(input1).label_type << endl; }
+        else if ( input2 == NULL ) {
+          input2 = dst; cout << "input2 = " << g.getData(input2).label_type << endl; }
         else {
           cerr << "Error: node " << g.getData(left).label_type << " has more than two inputs\n"; exit; }
-      } 
+      }
+      else {
+        goto nextcut; }
+        
     }
-    
+    cout << "Checking edges for right node\n";
     for (Graph::edge_iterator jj = g.edge_begin(right), ej = g.edge_end(right); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int e = g.getEdgeData(jj);
-      if ( dst == top )
-        right_edge = e;
-      else if ( e == 3 ) {
-        if ( input3 == NULL )
-          input1 = dst;
-        else if ( input2 == NULL )
-          input4 = dst;
+      int ew = g.getEdgeData(jj);
+      cout << "Found edge of weight " << ew << " to node " << g.getData(dst).label_type << endl;
+      if ( dst == top ) {
+        right_edge = ew; cout << "right_edge = " << left_edge << endl; }
+      else if ( ew == 3 ) {
+        if ( input3 == NULL ) {
+          input3 = dst; cout << "input3 = " << g.getData(input3).label_type << endl; }
+        else if ( input4 == NULL ) {
+          input4 = dst; cout << "input4 = " << g.getData(input4).label_type << endl; }
         else {
-          cerr << "Error: node " << g.getData(left).label_type << " has more than two inputs\n"; exit; }
-      } 
+          cerr << "Error: node " << g.getData(right).label_type << " has more than two inputs\n"; exit; }
+      }
+      else {
+        goto nextcut; }
     }
     
-    
-    
+    cout << "\nCut:\n";
+    cout << "Output(s) = ";
+    cout << "Top = " << g.getData(top).label_type << endl;
+    cout << "Left = " << g.getData(left).label_type << endl;
+    cout << "Right = " << g.getData(left).label_type << endl;
+    cout << "Left_edge = " << left_edge << endl;
+    cout << "Right_edge = " << right_edge << endl;
+    cout << "Input1 = " << g.getData(input1).label_type << endl;
+    cout << "Input2 = " << g.getData(input2).label_type << endl;
+    cout << "Input3 = " << g.getData(input3).label_type << endl;
+    cout << "Input4 = " << g.getData(input4).label_type << endl;
+    cout << endl;
+  }
+  cout << "Done\n";
   return 0;
 }
 
