@@ -201,7 +201,7 @@ int main(int argc, char** argv) {
     cout << "Output(s) = "; cout << endl;
     cout << "Top = " << g.getData(top).label_type << endl;
     cout << "Left = " << g.getData(left).label_type << endl;
-    cout << "Right = " << g.getData(left).label_type << endl;
+    cout << "Right = " << g.getData(right).label_type << endl;
     cout << "Left_edge = " << left_edge << endl;
     cout << "Right_edge = " << right_edge << endl;
     cout << "Input1 = " << g.getData(input1).label_type << endl;
