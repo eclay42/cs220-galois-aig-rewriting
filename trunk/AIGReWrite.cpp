@@ -8,6 +8,18 @@
 
 using namespace std;
 
+
+public bool checkWorkability(Graph::GraphNode gnode){
+	count == 0
+	for (Graph::edge_iterator edge : g.out_edges(src)) {
+	   	count++;
+	   		}
+	if count > 1
+		return false;
+	else
+		return true;
+}
+
 //typedef Galois::Graph::FirstGraph<std::string,std::string,true> Graph;
 
 
@@ -104,8 +116,10 @@ int main(int argc, char** argv) {
         cout << "Forward noninverted edge to ";
       else if ( e == 2 )
         cout << "Forward inverted edge to ";
-      else
+      else if ( e == 3 )
         cout << "Back edge to ";
+      else
+    	  cout << "Edge error"<<;
       
       cout << g.getData(dst).label_type << endl;
       //cout << "edge weight: " << g.getEdgeData(jj);
@@ -213,4 +227,3 @@ int main(int argc, char** argv) {
   cout << "Done\n";
   return 0;
 }
-
