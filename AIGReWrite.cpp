@@ -8,18 +8,6 @@
 
 using namespace std;
 
-
-public bool checkWorkability(Graph::GraphNode gnode){
-	count == 0
-	for (Graph::edge_iterator edge : g.out_edges(src)) {
-	   	count++;
-	   		}
-	if count > 1
-		return false;
-	else
-		return true;
-}
-
 //typedef Galois::Graph::FirstGraph<std::string,std::string,true> Graph;
 
 
@@ -34,6 +22,18 @@ struct Node {
  };
  
 typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
+
+public bool checkWorkability(Graph::GraphNode gnode, Graph g){
+	count == 0
+	for (Graph::edge_iterator edge : g.out_edges(gnode)) {
+	   	count++;
+	   		}
+	if count > 1
+		return false;
+	else
+		return true;
+}
+
 
 int main(int argc, char** argv) {
 
