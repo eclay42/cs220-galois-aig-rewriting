@@ -22,13 +22,16 @@ struct Node {
  };
  
 typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
+Graph g;
 
-public bool checkWorkability(Graph::GraphNode gnode, Graph g){
-	count == 0
+bool checkWorkability(Graph::GraphNode gnode){
+	int count = 0;
 	for (Graph::edge_iterator edge : g.out_edges(gnode)) {
-	   	count++;
-	   		}
-	if count > 1
+		int edgedata = g.getEdgeData(edge);
+	   	if(edgedata == 1|| edgedata ==2)
+	   		count++;
+	   	}
+	if (count > 1)
 		return false;
 	else
 		return true;
@@ -41,7 +44,7 @@ int main(int argc, char** argv) {
    * Subgraph 1 from Fig.2 in "DAG-Aware AIG Rewriting"
    *
    */
-  Graph g;
+
   Node vn1, vn2, vn3, vn4, vn5, vn6, vn7, vn8;
   Graph::GraphNode n1, n2, n3, n4, n5, n6, n7, n8;
 
@@ -119,7 +122,7 @@ int main(int argc, char** argv) {
       else if ( e == 3 )
         cout << "Back edge to ";
       else
-    	  cout << "Edge error"<<;
+    	  cout << "Edge error";
       
       cout << g.getData(dst).label_type << endl;
       //cout << "edge weight: " << g.getEdgeData(jj);
