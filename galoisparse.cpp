@@ -109,55 +109,64 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	//cout <<"compare assign"<<endl;
 	if(fields[0].compare("assign") == 0)
 	{
-	int level1,level2;
-
+		int level1,level2;
+		string f1,f3,f5;
+		f1 = fields[1];
+		f3 = fields[3];
+		f5 = fields[5];
 		if(fields[4].compare("|") == 0)
 		{	//Edge weight: 2- Negative 1 - Positive
-			g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(0,fields[3].length())]]//src
-										   ,gnodes[map[fields[1]]])) = 2;//dest
-			g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]
-										   ,gnodes[map[fields[1]]])) = 2;
+			f3 = f3.substr(0,f3.length());
+			f5 = f5.substr(0,f5.length()-1);
+			g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
+										   ,gnodes[map[f1]])) = 2;//dest
 
-			level1 = g.getData(gnodes[map[fields[3].substr(0,fields[3].length())]]).level;
-			level2 = g.getData(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]).level;
-			g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-					  gnodes[map[fields[3].substr(0,fields[3].length())]])) = 3;//back edges to determine fanins -> wt. = 3
-			g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-					  gnodes[map[fields[5].substr(0,fields[5].length())]])) = 3;//back edges to determins fanins -> wt. = 3
+			g.getEdgeData(g.addEdge(gnodes[map[f5]]
+										   ,gnodes[map[f1]])) = 2;
+
+			level1 = g.getData(gnodes[map[f3]]).level;
+			level2 = g.getData(gnodes[map[f5]]).level;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+					  gnodes[map[f3]])) = 3;//back edges to determine fanins -> wt. = 3
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+					  gnodes[map[f5]])) = 3;//back edges to determins fanins -> wt. = 3
 		}
 	
 		else
 		{	size_t invert = fields[3].find_first_of("~");
 			if (invert != string::npos){
+				f3 = f3.substr(1,f3.length());
 				//addEdge(src,dest)
 				//remove the '~' from the start of string
 				//map[string] returns node index to find which node
-				g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(1,fields[3].length())]],gnodes[map[fields[1]]])) = 2;//
-				level1 = g.getData(gnodes[map[fields[3].substr(1,fields[3].length())]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-							  gnodes[map[fields[3].substr(1,fields[3].length())]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;//
+				level1 = g.getData(gnodes[map[f3]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+							  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 			else{
-				g.getEdgeData(g.addEdge(gnodes[map[fields[3].substr(0,fields[3].length())]],gnodes[map[fields[1]]])) = 1;
-				level1 = g.getData(gnodes[map[fields[3].substr(0,fields[3].length())]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-						  gnodes[map[fields[3].substr(0,fields[3].length())]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
+				level1 = g.getData(gnodes[map[f3]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
 
 			}
 			invert = fields[5].find_first_of("~");
 			if (invert != string::npos){
+				f5 = f5.substr(1,f5.length()-2);
 				//remove first and last char b/c '~' to start and ';' at th
 				//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
-				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(1,fields[5].length()-2)]],gnodes[map[fields[1]]])) = 2;
-				level2 = g.getData(gnodes[map[fields[5].substr(1,fields[5].length()-2)]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-						  gnodes[map[fields[5].substr(1,fields[5].length()-2)]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 2;
+				level2 = g.getData(gnodes[map[f5]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 			else{
-				g.getEdgeData(g.addEdge(gnodes[map[fields[5].substr(0,fields[5].length()-1)]],gnodes[map[fields[1]]])) = 1;
-				level2 = g.getData(gnodes[map[fields[5].substr(0,fields[5].length()-1)]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[fields[1]]],
-						  gnodes[map[fields[5].substr(0,fields[5].length()-1)]])) = 3;// Back edges to determine fanins -> wt. = 3
+				f5 = f5.substr(0,f5.length()-1);
+				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 1;
+				level2 = g.getData(gnodes[map[f5]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 		}
 
@@ -179,11 +188,13 @@ int main(int argc, char *argv[]) {
 
 	//cout << g.getData(gnodes[0]).label_type << endl;
 	// Traverse graph
- 	for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
-   		Graph::GraphNode src = *ii;
+ 	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
+	for ( Graph::GraphNode src : g){
+   		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
-		cout <<"src: level"<<g.getData(src).level;
-   		for (Graph::edge_iterator edge : g.out_edges(src)) {
+		cout <<" level: "<<g.getData(src).level;
+
+		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
      		cout <<" dest: "<< g.getData(dst).label_type;
      		int edgeData = g.getEdgeData(edge);
