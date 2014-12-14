@@ -44,6 +44,26 @@ bool checkWorkability(Graph::GraphNode gnode){
 		return true;
 }
 
+bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNode &child_right)
+{
+	if ( g.getData(top).level != 0 && g.getData(top).level != 1) {
+		for (Graph::edge_iterator edge : g.out_edges(top)){
+			Graph::GraphNode dst = g.getEdgeDst(edge);
+			if(g.getEdgeData(edge) == 3){	
+				if(child_left==NULL){
+					child_left=dst;
+				}	
+				else{
+					child_right=dst;
+				}
+			}
+		}
+		return true;			
+	}
+	else 
+		return false;
+}
+
 void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	ifstream fin;
 	fin.open(inFile); // open a file
@@ -207,6 +227,14 @@ int main(int argc, char *argv[]) {
  		cout << "1 output"<<endl;
  	else
  		cout <<"more than 1 output"<<endl;
+
+	bool out;
+	Graph::GraphNode child_left=NULL,child_right=NULL;
+	if(find_cut(gnodes[map["s0"]],child_left,child_right)){
+		cout<<"Src node:"<<g.getData(gnodes[map["s0"]]).label_type << endl;
+		cout<<"Child node 1:"<<g.getData(child_left).label_type << endl;
+		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
+	}
 
 	return 0;
 }
