@@ -44,6 +44,23 @@ bool checkWorkability(Graph::GraphNode gnode){
 		return true;
 }
 
+bool isEqualNodes(Graph::GraphNode gnode1, Graph::GraphNode gnode2){
+	int count = 0;
+	for (Graph::edge_iterator edge1 : g.out_edges(gnode1)){
+		for (Graph::edge_iterator edge2 : g.out_edges(gnode2)){
+			if(g.getEdgeData(edge1)== 3)
+				if(g.getEdgeData(edge2)== 3)
+					if(g.getEdgeDst(edge1)==g.getEdgeDst(edge2)){
+						count++;
+					}
+		}
+	}
+	if(count == 2)
+		return true;
+	else
+		return false;
+}
+
 bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNode &child_right)
 {
 	if ( g.getData(top).level != 0 && g.getData(top).level != 1) {
@@ -235,6 +252,9 @@ int main(int argc, char *argv[]) {
 		cout<<"Child node 1:"<<g.getData(child_left).label_type << endl;
 		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
 	}
+
+	//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
+	//	cout << "equal nodes"<<endl;
 
 	return 0;
 }
