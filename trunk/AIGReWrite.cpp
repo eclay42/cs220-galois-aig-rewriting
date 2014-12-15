@@ -5,6 +5,7 @@
 #include <boost/iterator/counting_iterator.hpp>
 #include <iostream>
 #include <string>
+#include <sstream>
 
 using namespace std;
 
@@ -24,6 +25,7 @@ struct Node {
 typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 Graph g;
 
+stringstream ss;
 
 int main(int argc, char** argv) {
 
@@ -34,7 +36,7 @@ int main(int argc, char** argv) {
 
   Node vn1, vn2, vn3, vn4, vn5, vn6, vn7, vn8;
   Graph::GraphNode n1, n2, n3, n4, n5, n6, n7, n8;
-
+  
   /*
    * Label vertices
    */
@@ -201,6 +203,35 @@ int main(int argc, char** argv) {
         goto nextcut; }
     }
     
+    string hash = "";
+    char in1, in2, in3, in4;
+    char lastin = 'a';
+    in1 = lastin;
+    
+    if ( input1 == input2 )
+      in2 = in1;
+    else
+      in2 = ++lastin;
+    
+    if ( input3 == input1 )
+      in3 = in1;
+    else if ( input3 == input2 )
+      in3 = in2;
+    else
+      in3 = ++lastin;
+    
+    if ( input4 == input1 )
+      in4 = in1;
+    else if ( input4 == input2 )
+      in4 = in2;
+    else if ( input4 == input3 )
+      in4 = in3;
+    else
+      in4 = ++lastin;
+
+    ss << left_edge << right_edge << in1 << in2 << in3 << in4;
+    hash = ss.str();
+    
     cout << "\nCut:\n";
     cout << "Output(s) = "; cout << endl;
     cout << "Top = " << g.getData(top).label_type << endl;
@@ -212,6 +243,7 @@ int main(int argc, char** argv) {
     cout << "Input2 = " << g.getData(input2).label_type << endl;
     cout << "Input3 = " << g.getData(input3).label_type << endl;
     cout << "Input4 = " << g.getData(input4).label_type << endl;
+    cout << "Hash = " << hash << endl;
     cout << endl;
   }
   cout << "Done\n";
