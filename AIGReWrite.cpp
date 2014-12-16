@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
   /*
    * Create edges
    */
-  g.getEdgeData(g.addEdge(n1, n4)) = 1; // a0->n0
+  g.getEdgeData(g.addEdge(n1, n4)) = 2; // a0->n0
   g.getEdgeData(g.addEdge(n4, n1)) = 3; // n0->a0 (back edge)
   g.getEdgeData(g.addEdge(n1, n5)) = 1; // a0->n1
   g.getEdgeData(g.addEdge(n5, n1)) = 3; // n1->a0 (back edge)
@@ -90,7 +90,7 @@ int main(int argc, char** argv) {
   g.getEdgeData(g.addEdge(n4, n6)) = 1; // n0->n2
   g.getEdgeData(g.addEdge(n6, n4)) = 3; // n2->n0 (back edge)
   
-  g.getEdgeData(g.addEdge(n5, n6)) = 1; // n1->n2
+  g.getEdgeData(g.addEdge(n5, n6)) = 2; // n1->n2
   g.getEdgeData(g.addEdge(n6, n5)) = 3; // n2->n1 (back edge)
 
   g.getEdgeData(g.addEdge(n6, n7)) = 1; // n2->s0
@@ -203,22 +203,60 @@ int main(int argc, char** argv) {
         goto nextcut; }
     }
     
-    string hash = "";
-    char in1, in2, in3, in4;
-    char lastin = 'a';
-    in1 = lastin;
+    int edge1, edge2, edge3, edge4;
     
+    cout << "Checking edges for input1\n";
+    for (Graph::edge_iterator jj = g.edge_begin(input1), ej = g.edge_end(input1); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int ew = g.getEdgeData(jj);
+      if ( dst == left ) {
+        edge1 = ew; cout << "edge1 = " << edge1 << endl; break;}
+    }
+    
+    cout << "Checking edges for input2\n";
+    for (Graph::edge_iterator jj = g.edge_begin(input2), ej = g.edge_end(input2); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int ew = g.getEdgeData(jj);
+      if ( dst == left ) {
+        edge2 = ew; cout << "edge2 = " << edge2 << endl; break;}
+    }
+    
+    cout << "Checking edges for input3\n";
+    for (Graph::edge_iterator jj = g.edge_begin(input3), ej = g.edge_end(input3); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int ew = g.getEdgeData(jj);
+      if ( dst == right ) {
+        edge3 = ew; cout << "edge3 = " << edge3 << endl; break;}
+    }
+    
+    cout << "Checking edges for input4\n";
+    for (Graph::edge_iterator jj = g.edge_begin(input4), ej = g.edge_end(input4); jj != ej; ++jj) {
+      Graph::GraphNode dst = g.getEdgeDst(jj);
+      int ew = g.getEdgeData(jj);
+      if ( dst == right ) {
+        edge4 = ew; cout << "edge4 = " << edge4 << endl; break;}
+    }
+    
+    
+    string bool_exp = "";
+    string in1 = "", in2 = "", in3 = "", in4 = "";
+    char lastin = 'a';
+    
+    in1 += lastin;
+      
     if ( input1 == input2 )
       in2 = in1;
     else
-      in2 = ++lastin;
+      in2 += ++lastin;
+    
     
     if ( input3 == input1 )
       in3 = in1;
     else if ( input3 == input2 )
       in3 = in2;
     else
-      in3 = ++lastin;
+      in3 += ++lastin;
+
     
     if ( input4 == input1 )
       in4 = in1;
@@ -227,23 +265,47 @@ int main(int argc, char** argv) {
     else if ( input4 == input3 )
       in4 = in3;
     else
-      in4 = ++lastin;
+      in4 += ++lastin;
+    
+    if ( edge1 == 2 )
+      in1 += "'";
+    if ( edge2 == 2 )
+      in2 += "'";
+    if ( edge3 == 2 )
+      in3 += "'";
+    if ( edge4 == 2 )
+      in4 += "'";
+      
+    string in_left = "", in_right = "";
+    in_left = "(" + in1 + in2 + ")";
+    if ( left_edge == 2 )
+      in_left += "'";
+    in_right = "(" + in3 + in4 + ")";
+    if ( right_edge == 2 )
+      in_right += "'";
 
-    ss << left_edge << right_edge << in1 << in2 << in3 << in4;
-    hash = ss.str();
+    //ss << left_edge << right_edge << in1 << in2 << in3 << in4;
+    bool_exp = in_left + in_right;
+    
+    // generate truth table
+    bool x, y; // intermediate values
+    string truth_table = "";
+    if ( lastin == 1 ) {
+      cerr << "All inputs to the cut are identical\n"; exit; }
+    else if ( lastin == 4 ) {
+      cout << "All inputs to the cut are unique, unable to simplify\n"; goto nextcut; }
+    
+    int n;
+    if ( lastin == 'b' ) n = 4;
+    else n = 8;
+    
+    for ( int i = 0; i < n; ++i )
+    {
+    }
     
     cout << "\nCut:\n";
-    cout << "Output(s) = "; cout << endl;
-    cout << "Top = " << g.getData(top).label_type << endl;
-    cout << "Left = " << g.getData(left).label_type << endl;
-    cout << "Right = " << g.getData(right).label_type << endl;
-    cout << "Left_edge = " << left_edge << endl;
-    cout << "Right_edge = " << right_edge << endl;
-    cout << "Input1 = " << g.getData(input1).label_type << endl;
-    cout << "Input2 = " << g.getData(input2).label_type << endl;
-    cout << "Input3 = " << g.getData(input3).label_type << endl;
-    cout << "Input4 = " << g.getData(input4).label_type << endl;
-    cout << "Hash = " << hash << endl;
+    cout << "Boolean Expression = " << bool_exp << endl;
+    cout << "Truth Table = " << truth_table << endl;
     cout << endl;
   }
   cout << "Done\n";
