@@ -206,9 +206,10 @@ int main(int argc, char** argv) {
     int edge1, edge2, edge3, edge4;
     
     cout << "Checking edges for input1\n";
+    int ew;
     for (Graph::edge_iterator jj = g.edge_begin(input1), ej = g.edge_end(input1); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int ew = g.getEdgeData(jj);
+      ew = g.getEdgeData(jj);
       if ( dst == left ) {
         edge1 = ew; cout << "edge1 = " << edge1 << endl; break;}
     }
@@ -216,7 +217,7 @@ int main(int argc, char** argv) {
     cout << "Checking edges for input2\n";
     for (Graph::edge_iterator jj = g.edge_begin(input2), ej = g.edge_end(input2); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int ew = g.getEdgeData(jj);
+      ew = g.getEdgeData(jj);
       if ( dst == left ) {
         edge2 = ew; cout << "edge2 = " << edge2 << endl; break;}
     }
@@ -224,7 +225,7 @@ int main(int argc, char** argv) {
     cout << "Checking edges for input3\n";
     for (Graph::edge_iterator jj = g.edge_begin(input3), ej = g.edge_end(input3); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int ew = g.getEdgeData(jj);
+      ew = g.getEdgeData(jj);
       if ( dst == right ) {
         edge3 = ew; cout << "edge3 = " << edge3 << endl; break;}
     }
@@ -232,7 +233,7 @@ int main(int argc, char** argv) {
     cout << "Checking edges for input4\n";
     for (Graph::edge_iterator jj = g.edge_begin(input4), ej = g.edge_end(input4); jj != ej; ++jj) {
       Graph::GraphNode dst = g.getEdgeDst(jj);
-      int ew = g.getEdgeData(jj);
+      ew = g.getEdgeData(jj);
       if ( dst == right ) {
         edge4 = ew; cout << "edge4 = " << edge4 << endl; break;}
     }
@@ -287,9 +288,6 @@ int main(int argc, char** argv) {
     //ss << left_edge << right_edge << in1 << in2 << in3 << in4;
     bool_exp = in_left + in_right;
     
-    // generate truth table
-    bool x, y; // intermediate values
-    string truth_table = "";
     if ( lastin == 1 ) {
       cerr << "All inputs to the cut are identical\n"; exit; }
     else if ( lastin == 4 ) {
@@ -301,6 +299,7 @@ int main(int argc, char** argv) {
     
     for ( int i = 0; i < n; ++i )
     {
+      
     }
     
     cout << "\nCut:\n";
