@@ -15,12 +15,17 @@ using namespace boost;
 typedef enum{pi,po,nd} node_type;
 
 struct Node {
- string label_type;//a0,b0...
- node_type type;// pi,po,nd
- int fanins; // Not required as of now
- bool fanout; //Not required as of now
- int level;
- };
+  string label_type;//a0,b0...
+  node_type type;// pi,po,nd
+  int fanins; // Not required as of now
+  bool fanout; //Not required as of now
+  int level;
+  };
+ 
+struct Cut {
+  Graph::GraphNode top, left, right, in1, in2, in3, in4;
+  int e_l, e_r, e1, e2, e3, e4;
+}
 
 typedef Galois::Graph::FirstGraph<Node,int,true> Graph;
 
@@ -66,24 +71,79 @@ bool isEqualNodes(Graph::GraphNode gnode1, Graph::GraphNode gnode2){
 		return false;
 }
 
-bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNode &child_right)
+bool find_cut( Graph::GraphNode &top, Cut c )
 {
-	if ( g.getData(top).level != 0 && g.getData(top).level != 1) {
-		for (Graph::edge_iterator edge : g.out_edges(top)){
-			Graph::GraphNode dst = g.getEdgeDst(edge);
-			if(g.getEdgeData(edge) == 3){	
-				if(child_left==NULL){
-					child_left=dst;
-				}	
-				else{
-					child_right=dst;
-				}
-			}
-		}
-		return true;			
-	}
-	else 
-		return false;
+	if ( g.getData(top).node_type != nd )
+	  return false;
+	  
+	c.top = top;
+	getChildren(c.top, c.left, c.right);
+	
+	if ( g.getData(c.left).node_type != nd || g.getData(c.right).node_type != nd )
+	  return false;
+	  
+	if ( !checkWorkability(c.left) || !checkWorkability(c.right) )
+	  return false;
+	  
+	getChildren(c.left, c.in1, c.in2);
+	getChildren(c.right, c.in3, c.in4);
+	
+	Graph::edge_iterator edge = findEdge(c.left, c.top);  c.e_l = g.getEdgeData(e);
+	Graph::edge_iterator edge = findEdge(c.right, c.top); c.e_r = g.getEdgeData(e);
+	Graph::edge_iterator edge = findEdge(c.in1, c.left);  c.e1 = g.getEdgeData(e);
+	Graph::edge_iterator edge = findEdge(c.in2, c.left);  c.e2 = g.getEdgeData(e);
+	Graph::edge_iterator edge = findEdge(c.in3, c.right); c.e3 = g.getEdgeData(e);
+	Graph::edge_iterator edge = findEdge(c.in4, c.right); c.e4 = g.getEdgeData(e);
+	
+  return true;
+}
+
+string inputClass( Cut c )
+{
+  string in1 = "", in2 = "", in3 = "", in4 = "";
+  char lastin = 'a';
+    
+  in1 += lastin;
+      
+  if ( input1 == input2 )
+    in2 = in1;
+  else
+    in2 += ++lastin;
+  
+  if ( input3 == input1 )
+    in3 = in1;
+  else if ( input3 == input2 )
+    in3 = in2;
+  else
+    in3 += ++lastin;
+
+  if ( input4 == input1 )
+    in4 = in1;
+  else if ( input4 == input2 )
+    in4 = in2;
+  else if ( input4 == input3 )
+    in4 = in3;
+  else
+    in4 += ++lastin;
+    
+  if ( edge1 == 2 )
+    in1 += "'";
+  if ( edge2 == 2 )
+    in2 += "'";
+  if ( edge3 == 2 )
+    in3 += "'";
+  if ( edge4 == 2 )
+    in4 += "'";
+      
+  string in_left = "", in_right = "";
+  in_left = "(" + in1 + in2 + ")";
+  if ( left_edge == 2 )
+    in_left += "'";
+  in_right = "(" + in3 + in4 + ")";
+  if ( right_edge == 2 )
+    in_right += "'";
+
+  return in_left + in_right;
 }
 
 void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
