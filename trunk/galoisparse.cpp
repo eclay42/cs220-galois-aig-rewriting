@@ -46,6 +46,11 @@ bool checkWorkability(Graph::GraphNode gnode){
 
 bool isEqualNodes(Graph::GraphNode gnode1, Graph::GraphNode gnode2){
 	int count = 0;
+	if(g.getData(gnode1).label_type==g.getData(gnode2).label_type){
+		//cout<< "same node"<<endl;
+		return true;
+	}
+
 	for (Graph::edge_iterator edge1 : g.out_edges(gnode1)){
 		for (Graph::edge_iterator edge2 : g.out_edges(gnode2)){
 			if(g.getEdgeData(edge1)== 3)
@@ -216,6 +221,24 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	}
 }
 
+bool checkxor(Graph::GraphNode node){
+	Graph::GraphNode inode1=NULL,inode2=NULL;
+	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
+
+
+}
+
+void getChildren(Graph::GraphNode parent, Graph::GraphNode &child1, Graph::GraphNode &child2){
+	for (Graph::edge_iterator edge : g.out_edges(node)){
+			if(g.getEdgeData(edge)==3){
+				if (inode1==NULL)
+					inode1 = g.getEdgeDst(edge);
+				else
+					inode2 = g.getEdgeDst(edge);
+			}
+		}
+}
+
 int main(int argc, char *argv[]) {
 	unordered_map <string, int> map;
 	if ( argc != 2 )
@@ -253,8 +276,8 @@ int main(int argc, char *argv[]) {
 		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
 	}
 
-	//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
-	//	cout << "equal nodes"<<endl;
+	if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
+		cout << "equal nodes"<<endl;
 
 	return 0;
 }
