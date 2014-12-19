@@ -221,24 +221,40 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	}
 }
 
-bool checkxor(Graph::GraphNode node){
-	Graph::GraphNode inode1=NULL,inode2=NULL;
-	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
 
-
-}
 
 void getChildren(Graph::GraphNode parent, Graph::GraphNode &child1, Graph::GraphNode &child2){
-	for (Graph::edge_iterator edge : g.out_edges(node)){
+	bool  a = true;
+	for (Graph::edge_iterator edge : g.out_edges(parent)){
 			if(g.getEdgeData(edge)==3){
-				if (inode1==NULL)
-					inode1 = g.getEdgeDst(edge);
+				if (a){
+					child1 = g.getEdgeDst(edge);
+					a = !a;
+				}
 				else
-					inode2 = g.getEdgeDst(edge);
+					child2 = g.getEdgeDst(edge);
 			}
 		}
 }
 
+bool checkxor(Graph::GraphNode node){
+	Graph::GraphNode inode1=NULL,inode2=NULL;
+	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
+	getChildren(node,inode1,inode2);
+	getChildren(inode1, input1, input2);
+	getChildren(inode2, input3, input4);
+	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2)
+	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
+		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
+			cout << "nequal edges\n";
+			if(g.getEdgeData(g.findEdge(input2,inode1))!=g.getEdgeData(g.findEdge(input4,inode2))){
+				cout << "true\n";
+				return true;
+			}
+		}
+	cout<<"false\n";
+	return false;
+}
 int main(int argc, char *argv[]) {
 	unordered_map <string, int> map;
 	if ( argc != 2 )
@@ -276,8 +292,11 @@ int main(int argc, char *argv[]) {
 		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
 	}
 
-	if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
-		cout << "equal nodes"<<endl;
+	//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
+	//	cout << "equal nodes"<<endl;
+	checkxor(gnodes[map["s0"]]);
+	checkxor(gnodes[map["s1"]]);
+	checkxor(gnodes[map["s2"]]);
 
 	return 0;
 }
