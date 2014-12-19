@@ -304,9 +304,10 @@ int main(int argc, char** argv) {
     
     cout << "\nCut:\n";
     cout << "Boolean Expression = " << bool_exp << endl;
-    cout << "Truth Table = " << truth_table << endl;
+    //cout << "Truth Table = " << truth_table << endl;
     cout << endl;
   }
   cout << "Done\n";
+  //Graph::outputTextEdgeData("out.txt", g);
   return 0;
 }
