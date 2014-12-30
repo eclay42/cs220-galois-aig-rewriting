@@ -272,10 +272,10 @@ void convertxor(Graph::GraphNode node){
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(input1,inode1))==2){
 		Graph::edge_iterator edge = g.findEdge(input1,inode1);
-		g.removeEdge(input1,edge);
-		cout<<"Removed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
+		//g.removeEdge(input1,edge);
+		//cout<<"Removed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
 		cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
-		g.getEdgeData(g.addEdge(input1,inode1))=1;
+		g.getEdgeData(edge)=1;
 		cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
 	}
 	else
