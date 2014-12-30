@@ -264,27 +264,34 @@ bool checkxnor(Graph::GraphNode node){
 }
 */
 
-void convertxor(Graph::GraphNode node){
+void convertxor(Graph::GraphNode node,unordered_map <string, int> &map){
 	Graph::GraphNode inode1=NULL,inode2=NULL;
 	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
+	string child_label,parent_label;
 	getChildren(node,inode1,inode2);
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(input1,inode1))==2){
-		Graph::edge_iterator edge = g.findEdge(input1,inode1);
+		//Graph::edge_iterator edge = g.findEdge(input1,inode1);
 		//g.removeEdge(input1,edge);
 		//cout<<"Removed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
 		cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
-		g.getEdgeData(edge)=1;
-		cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
+		g.getEdgeData(g.addEdge(input1,inode1))=1;
+		//child_label = g.getData(input1).label_type;
+		//parent_label = g.getData(inode1).label_type;
+		//cout<<child_label<<" "<<parent_label;
+		//g.getEdgeData(g.addEdge(gnodes[map.at(child_label)],gnodes[map.at(parent_label)]))=1;
+		//Graph::edge_iterator edge = g.findEdge(gnodes[map[child_label]],gnodes[map[parent_label]]);
+		//g.getEdgeData(edge)=1;
+		cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;		
 	}
 	else
 		g.getEdgeData(g.addEdge(input2,inode1))=1;
 
 	if(g.getEdgeData(g.findEdge(input3,inode2))==1)
-		g.getEdgeData(g.addEdge(input1,inode1))=2;
+		g.getEdgeData(g.addEdge(input3,inode2))=2;
 	else
-		g.getEdgeData(g.addEdge(input2,inode1))=2;
+		g.getEdgeData(g.addEdge(input4,inode2))=2;
 
 	/*TO DO: Invert the output of the entire structure*/
 
@@ -338,11 +345,11 @@ int main(int argc, char *argv[]) {
 
 	//checkxnor(gnodes[map["s0"]]);
 	if(checkxor(gnodes[map["s0"]])){
-		convertxor(gnodes[map["s0"]]);
+		convertxor(gnodes[map["s0"]],map);
 	}
 
 	cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
-/*
+
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
@@ -357,6 +364,6 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}	
-*/
+
 	return 0;
 }
