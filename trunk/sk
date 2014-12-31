@@ -1,0 +1,24 @@
+// Benchmark "rca2" written by ABC on Fri Nov 21 02:38:26 2014
+
+module rca2 ( 
+    a0, b0, a1, b1,
+    s0, s1, s2  );
+  input  a0, b0, a1, b1;
+  output s0, s1, s2;
+  wire n8, n9, n11, n12, n13, n14, n15, n16, n18, n19;
+  assign n8 = ~a0 & b0;
+  assign n9 = a0 & ~b0;
+  assign s0 = n8 | n9;
+  assign n11 = a0 & b0;
+  assign n12 = ~a1 & b1;
+  assign n13 = a1 & ~b1;
+  assign n14 = ~n12 & ~n13;
+  assign n15 = n11 & n14;
+  assign n16 = ~n11 & ~n14;
+  assign s1 = n15 | n16;
+  assign n18 = a1 & b1;
+  assign n19 = n11 & ~n14;
+  assign s2 = n18 | n19;
+endmodule
+
+
