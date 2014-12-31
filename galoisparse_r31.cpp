@@ -358,8 +358,10 @@ void convertxor_cost(Graph::GraphNode node){
 
 int main(int argc, char *argv[]) {
 	unordered_map <string, int> map;
-	if ( argc != 2 )
+	if ( argc != 2 ){
     		cout<<"usage: "<< argv[0] <<" <filename>\n";
+		return 0;
+	}
   	else
   			parseFileintoGraph(argv[1],map);
 
