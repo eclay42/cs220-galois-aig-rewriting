@@ -12,7 +12,7 @@
 using namespace std;
 using namespace boost;
 
-typedef enum{pi,po,nd} node_type;
+typedef enum{pi,po,nd,op} node_type;
 
 struct Node {
  string label_type;//a0,b0...
@@ -47,6 +47,7 @@ bool checkWorkability(Graph::GraphNode gnode){
 
 bool isEqualNodes(Graph::GraphNode gnode1, Graph::GraphNode gnode2){
 	int count = 0;
+	
 	if(g.getData(gnode1).label_type==g.getData(gnode2).label_type){
 		//cout<< "same node"<<endl;
 		return true;
@@ -89,6 +90,7 @@ bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNod
 
 void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	ifstream fin;
+	Node output;
 	fin.open(inFile); // open a file
 	if (!fin.good()){
 		cout << "file not found\n";
@@ -126,6 +128,12 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 					n.type = po;
 					n.level = -1;
 					n.label_type = fields[i].substr(0,fields[i].length()-1);
+				
+					
+					output.type = op;
+					output.level = -2;
+					output.label_type = n.label_type+"_out";
+				
 					//nodes[node_index].type = po;
 					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 				}
@@ -137,6 +145,7 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 					//nodes[node_index].type = nd;
 					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 				}
+				cout<<"Check ----> "<< fields[i].substr(0,fields[i].length()-1) <<endl;
 				//remove last char b/c its ',' or ';'
 				map[fields[i].substr(0,fields[i].length()-1)] = node_index;
 				//gnodes[node_index] = g.createNode(nodes[node_index]);
@@ -145,6 +154,16 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 				g.addNode(gnodes[gnodes.size()-1]);
 				//cout << "node index: "<< node_index<<endl;
 				node_index++;
+				/*For storing output from the output node(No dangling edges on the final node) in the case that it is negated like in OR case*/
+				if(fields[0].compare("output") == 0)
+				{
+					map[output.label_type] = node_index;
+					gnodes.push_back(g.createNode(output));
+					g.addNode(gnodes[gnodes.size()-1]);
+					
+					g.getEdgeData(g.addEdge(gnodes[node_index-1],gnodes[node_index])) = 1;
+					node_index++;
+				}
 			}
 
 		}
@@ -166,6 +185,9 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 
 			g.getEdgeData(g.addEdge(gnodes[map[f5]]
 										   ,gnodes[map[f1]])) = 2;
+
+			cout << fields[1] << fields[3] << fields[5] << endl;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f1+"_out"]])) = 2; //****Hack*** Use edge iterators for identifying final nodes
 
 			level1 = g.getData(gnodes[map[f3]]).level;
 			level2 = g.getData(gnodes[map[f5]]).level;
@@ -238,13 +260,27 @@ void getChildren(Graph::GraphNode parent, Graph::GraphNode &child1, Graph::Graph
 		}
 }
 
+void make_replacement(Graph::GraphNode node, Graph::GraphNode match_node){
+	Graph::GraphNode child1,child2,temp;
+	for(Graph::edge_iterator edge : g.out_edges(match_node)){
+		temp = g.getEdgeDst(edge);
+		g.getEdgeData(g.addEdge(node,temp))=g.getEdgeData(edge);
+	}
+	getChildren(temp,child1,child2);
+	g.removeEdge(child1,g.findEdge(child1,temp));
+	g.removeEdge(child2,g.findEdge(child2,temp));
+	g.removeNode(match_node);
+}
+
 bool checkxor(Graph::GraphNode node){
 	Graph::GraphNode inode1=NULL,inode2=NULL;
 	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
 	getChildren(node,inode1,inode2);
+	cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
-	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2)
+	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
+	cout<<"Inside condn inode"<<endl;
 	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
 		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
 			cout << "nequal edges\n";
@@ -253,6 +289,7 @@ bool checkxor(Graph::GraphNode node){
 				return true;
 			}
 		}
+	}
 	cout<<"false\n";
 	return false;
 }
@@ -264,7 +301,8 @@ bool checkxnor(Graph::GraphNode node){
 }
 */
 
-void convertxor(Graph::GraphNode node,unordered_map <string, int> &map){
+void convertxor_cost(Graph::GraphNode node){
+	int cost=0;
 	Graph::GraphNode inode1=NULL,inode2=NULL;
 	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
 	string child_label,parent_label;
@@ -293,10 +331,29 @@ void convertxor(Graph::GraphNode node,unordered_map <string, int> &map){
 	else
 		g.getEdgeData(g.addEdge(input4,inode2))=2;
 
-	/*TO DO: Invert the output of the entire structure*/
+	for (Graph::edge_iterator edge : g.out_edges(node)){
+		if(g.getEdgeData(edge) == 2)
+			g.getEdgeData(edge) = 1;
+		else if(g.getEdgeData(edge) == 1)
+			g.getEdgeData(edge) = 2;
+	}
 
-	
-
+	/*Compute cost*/
+	for (Graph::edge_iterator edge : g.out_edges(input1)){
+		Graph::GraphNode dst = g.getEdgeDst(edge);
+		if((g.getData(dst).label_type != g.getData(inode1).label_type) &&  (g.getData(dst).label_type != g.getData(inode2).label_type)){
+			if(isEqualNodes(dst,inode1)){
+				cout<<"Match found: "<< g.getData(dst).label_type <<endl;
+				make_replacement(inode1,dst);
+				cost++;
+			}
+			else if(isEqualNodes(dst,inode2)){
+				cout<<"Match found: "<< g.getData(dst).label_type <<endl;
+				make_replacement(inode2,dst);
+				cost++;
+			}
+		}
+	}
 }
 
 int main(int argc, char *argv[]) {
@@ -345,9 +402,13 @@ int main(int argc, char *argv[]) {
 
 	//checkxnor(gnodes[map["s0"]]);
 	if(checkxor(gnodes[map["s0"]])){
-		convertxor(gnodes[map["s0"]],map);
+		convertxor_cost(gnodes[map["s0"]]);
 	}
-
+/*
+	if(checkxor(gnodes[map["n14"]])){
+		convertxor_cost(gnodes[map["n14"]]);
+	}
+*/
 	cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
 
 	for ( Graph::GraphNode src : g){
