@@ -262,13 +262,17 @@ void getChildren(Graph::GraphNode parent, Graph::GraphNode &child1, Graph::Graph
 
 void make_replacement(Graph::GraphNode node, Graph::GraphNode match_node){
 	Graph::GraphNode child1,child2,temp;
+	getChildren(node,child1,child2);
 	for(Graph::edge_iterator edge : g.out_edges(match_node)){
 		temp = g.getEdgeDst(edge);
-		g.getEdgeData(g.addEdge(node,temp))=g.getEdgeData(edge);
+		if(!((isEqualNodes(child1,temp))||isEqualNodes(child2,temp))){
+			g.getEdgeData(g.addEdge(node,temp))=g.getEdgeData(edge);
+			g.getEdgeData(g.addEdge(temp,node))=3;//Assigning back edges from the parent nodes of the removed copy node to the original node
+		}
+		
 	}
-	getChildren(temp,child1,child2);
-	g.removeEdge(child1,g.findEdge(child1,temp));
-	g.removeEdge(child2,g.findEdge(child2,temp));
+	g.removeEdge(child1,g.findEdge(child1,match_node));
+	g.removeEdge(child2,g.findEdge(child2,match_node));
 	g.removeNode(match_node);
 }
 
@@ -310,17 +314,8 @@ void convertxor_cost(Graph::GraphNode node){
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(input1,inode1))==2){
-		//Graph::edge_iterator edge = g.findEdge(input1,inode1);
-		//g.removeEdge(input1,edge);
-		//cout<<"Removed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;
 		cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
 		g.getEdgeData(g.addEdge(input1,inode1))=1;
-		//child_label = g.getData(input1).label_type;
-		//parent_label = g.getData(inode1).label_type;
-		//cout<<child_label<<" "<<parent_label;
-		//g.getEdgeData(g.addEdge(gnodes[map.at(child_label)],gnodes[map.at(parent_label)]))=1;
-		//Graph::edge_iterator edge = g.findEdge(gnodes[map[child_label]],gnodes[map[parent_label]]);
-		//g.getEdgeData(edge)=1;
 		cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;		
 	}
 	else
@@ -332,6 +327,7 @@ void convertxor_cost(Graph::GraphNode node){
 		g.getEdgeData(g.addEdge(input4,inode2))=2;
 
 	for (Graph::edge_iterator edge : g.out_edges(node)){
+		cout<<"Node: "<<g.getData(node).label_type<<" -> "<<g.getData(g.getEdgeDst(edge)).label_type<<"Weight ="<< g.getEdgeData(edge)<<endl;
 		if(g.getEdgeData(edge) == 2)
 			g.getEdgeData(edge) = 1;
 		else if(g.getEdgeData(edge) == 1)
@@ -406,12 +402,27 @@ int main(int argc, char *argv[]) {
 	if(checkxor(gnodes[map["s0"]])){
 		convertxor_cost(gnodes[map["s0"]]);
 	}
-/*
+	
+	for ( Graph::GraphNode src : g){
+   		//Graph::GraphNode src = *ii;
+		cout <<"src: "<< g.getData(src).label_type;
+		cout <<" level: "<<g.getData(src).level;
+
+		for (Graph::edge_iterator edge : g.out_edges(src)) {
+   			Graph::GraphNode dst = g.getEdgeDst(edge);
+     		cout <<" dest: "<< g.getData(dst).label_type;
+     		int edgeData = g.getEdgeData(edge);
+     		cout << " edge data " << edgeData;
+     		//assert(edgeData == 5);
+   		}
+	   	cout <<endl;
+ 	}
+
 	if(checkxor(gnodes[map["n14"]])){
 		convertxor_cost(gnodes[map["n14"]]);
 	}
-*/
-	cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
+
+	//cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
 
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
@@ -427,6 +438,26 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}	
+
+	if(checkxor(gnodes[map["s1"]])){
+		convertxor_cost(gnodes[map["s1"]]);
+	}
+
+
+	for ( Graph::GraphNode src : g){
+   		//Graph::GraphNode src = *ii;
+		cout <<"src: "<< g.getData(src).label_type;
+		cout <<" level: "<<g.getData(src).level;
+
+		for (Graph::edge_iterator edge : g.out_edges(src)) {
+   			Graph::GraphNode dst = g.getEdgeDst(edge);
+     		cout <<" dest: "<< g.getData(dst).label_type;
+     		int edgeData = g.getEdgeData(edge);
+     		cout << " edge data " << edgeData;
+     		//assert(edgeData == 5);
+   		}
+	   	cout <<endl;
+ 	}
 
 	return 0;
 }
