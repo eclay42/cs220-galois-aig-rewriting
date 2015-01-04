@@ -352,18 +352,8 @@ void convertxor_cost(Graph::GraphNode node){
 	}
 }
 
-int main(int argc, char *argv[]) {
-	unordered_map <string, int> map;
-	if ( argc != 2 ){
-    		cout<<"usage: "<< argv[0] <<" <filename>\n";
-		return 0;
-	}
-  	else
-  			parseFileintoGraph(argv[1],map);
-
-	//cout << g.getData(gnodes[0]).label_type << endl;
-	// Traverse graph
- 	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
+void printGraph()
+{
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
@@ -378,6 +368,21 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
+}
+
+int main(int argc, char *argv[]) {
+	unordered_map <string, int> map;
+	if ( argc != 2 ){
+    		cout<<"usage: "<< argv[0] <<" <filename>\n";
+		return 0;
+	}
+  	else
+  			parseFileintoGraph(argv[1],map);
+
+	//cout << g.getData(gnodes[0]).label_type << endl;
+	// Traverse graph
+ 	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
+	printGraph();
  	if(checkWorkability(gnodes[map["n15"]]))
  		cout << "1 output"<<endl;
  	else
@@ -403,20 +408,7 @@ int main(int argc, char *argv[]) {
 		convertxor_cost(gnodes[map["s0"]]);
 	}
 	
-	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
-
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
- 	}
+	printGraph();
 
 	if(checkxor(gnodes[map["n14"]])){
 		convertxor_cost(gnodes[map["n14"]]);
@@ -424,40 +416,13 @@ int main(int argc, char *argv[]) {
 
 	//cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
 
-	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
-
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
- 	}	
+	printGraph();
 
 	if(checkxor(gnodes[map["s1"]])){
 		convertxor_cost(gnodes[map["s1"]]);
 	}
 
-
-	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
-
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
- 	}
+	printGraph();
 
 	return 0;
 }
