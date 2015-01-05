@@ -358,5 +358,6 @@ int main(int argc, char *argv[]) {
 	checkxor(gnodes[map["s1"]]);
 	checkxor(gnodes[map["s2"]]);
 
+	//outputTextEdgeData("file.txt",g);
 	return 0;
 }

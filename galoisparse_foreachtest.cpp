@@ -394,6 +394,8 @@ int main(int argc, char *argv[]) {
 	//cout << g.getData(gnodes[0]).label_type << endl;
 	// Traverse graph
  	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
+
+	//print graph first time
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
@@ -413,6 +415,8 @@ int main(int argc, char *argv[]) {
 	   	cout <<endl;
  	}
 	
+	//prints what? nodes being refactored?
+	//does what?
 	int level=2;
 	vector<Graph::GraphNode> temp;
 	while (! pq.empty()) {
@@ -501,6 +505,8 @@ int main(int argc, char *argv[]) {
 
 	T.stop();
 */
+
+	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
