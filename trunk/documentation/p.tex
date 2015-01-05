@@ -1,0 +1,55 @@
+\documentclass[twocolumn]{article}
+\usepackage[margin=1.0in]{geometry}
+\usepackage{color}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{enumitem}
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+\raggedbottom
+\setlength{\columnsep}{0.2in}
+
+\renewcommand{\labelenumi}{(\alph{enumi})}
+\title{\huge{Parallelizing DAG-Aware AIG Rewriting using Galois}}
+\date{\vspace{-5ex}}
+\author{
+  Clay, Eric\\
+  eclay003@ucr.edu
+  \and
+  Rogers, Alex\\
+  aroge005@ucr.edu
+  \and
+  Rowe, Bryan\\
+  browe001@ucr.edu
+  \and
+  Swarup, Aditya\\
+  aswar002@ucr.edu
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present a method to parallelize the DAG-Aware AIG Rewriting algorithm introduced at UC Berkeley in 2006 \cite{DAG}.  This particular algorithm is responsible for simplifying an and-interter-graph (AIG) by replacing equivalent 4-input cuts with smaller, logically equivalent counterparts.  However, the implemented algorithm in ABC\cite{DAG} can be improved since it may run slowly on very large inputs.\\\indent
+In this paper we use the Galois System\cite{GALOIS} to build an AIG from a Verilog input file and perform a modified version of the rewriting algorithm run in parallel.  The parallelism is done by processing groups of nodes in separate threads based on their level.  This method has the potential to run quicker than the original rewriting algorithm.
+\end{abstract}
+
+\section{Introduction}
+It is important to achieve as efficient of a circuit as possible when manufactoring hardware or mapping onto an FPGA.  Factors such as critical path delay, amount of resources available, and overall performance coincide with the efficiency of a circuit.\\\indent
+A way to be efficient is to reduce large logical components with smaller, equivalent ones.  This can be achieved using AIG rewriting proposed at UC Berkeley in 2006 \cite{DAG}.  This algorithm is implemented in the ABC tool built by the authors of this algorithm.\\\indent
+The current algorithm ABC rewriting algorithm does not utilize any parallelization and thus may have a long execution time for very large AIGs.  We introduce in this paper a modified version of the rewriting algorithm to exploit parallelism using the Galois graph framework \cite{GALOIS}.
+
+\section{Background}
+\subsection{ABC}
+ABC is a software platform that provides many algorithms related to operating on AIGs, provides an environment to implement custom algorithms, and provides an interface to run these algorithms.  The algorithm this paper is concerned with that ABC supports is rewriting, although it also supports variations of rewriting known as balancing and refactoring.
+\subsection{Galois}
+Galois is an open-source shared-memory graph-processing system\cite{GALOIS}.  One of its purposes is to take ordinary, sequential graph-processing algorithms and parallelize them using framework-provided Galois constructs.\newline\indent
+Galois executes loops in parallel where the programmer must specify a worklist of nodes or edges to process.  A loop that would normally execute sequentially can execute in parallel with the internal use of multiple threads.
+\section{Parallel Rewriting}
+The following is the psudocode for our parallel implementation of rewriting in Galois.
+\bibliographystyle{acm}
+\bibliography{bibfile}
+\end{document}
+
