@@ -1,4 +1,3 @@
-
 #include <iostream>
 #include <unordered_map>
 #include <boost/algorithm/string.hpp>
@@ -13,6 +12,7 @@ using namespace std;
 using namespace boost;
 
 typedef enum{pi,po,nd,op} node_type;
+typedef Galois::InsertBag<GNode> Bag;
 
 struct Node {
  string label_type;//a0,b0...
@@ -352,8 +352,7 @@ void convertxor_cost(Graph::GraphNode node){
 	}
 }
 
-void printGraph()
-{
+void printGraph() {
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
@@ -369,6 +368,46 @@ void printGraph()
 	   	cout <<endl;
  	}
 }
+
+// Populates max_level with the max level of the graph, g.  It also populates levelnodes that lists all nodes for each level.
+void groupNodesByLevel(unordered_map<int, vector<string>> & levelnodes, int & max_level) {
+	max_level = 0;
+	
+	for ( Graph::GraphNode src : g) {		
+		// if key already exists, append node to the end
+		if (levelnodes.count(g.getData(src).level) > 0) { // key exists
+			levelnodes[g.getData(src).level].push_back(g.getData(src).label_type);
+		}
+		else { // key doesn't exist, create vector
+			vector<string> v;
+			levelnodes[g.getData(src).level] = v;
+		}
+		
+		if (g.getData(src).level > max_level)
+		    max_level = g.getData(src).level;
+ 	}
+}
+
+
+/* Under constuction
+struct Process {
+	Bag& result;
+	Process(Bag& _result) : result(_result) { }
+	void operator()(GNode src, Galois::UserContext<GNode>& ctx) {
+		Graph::GraphNode child_left=NULL,child_right=NULL;
+		if(find_cut(gnodes[map["s0"]],child_left,child_right)){
+			cout<<"Src node:"<<g.getData(gnodes[map["s0"]]).label_type << endl;
+			cout<<"Child node 1:"<<g.getData(child_left).label_type << endl;
+			cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
+		}
+		
+		if(checkxor(gnodes[map["s0"]])){
+			convertxor_cost(gnodes[map["s0"]]);
+		}
+	}
+};
+*/
+
 
 int main(int argc, char *argv[]) {
 	unordered_map <string, int> map;
@@ -389,40 +428,61 @@ int main(int argc, char *argv[]) {
  		cout <<"more than 1 output"<<endl;
 
 	bool out;
+	
+	// Group nodes by level
+	unordered_map<int, vector<string>> levelnodes;
+	int max_level;
+	groupNodesByLevel(levelnodes, max_level);
+	
+	// Prints each node by level.
+	for(int level = 0 ; level <= max_level ; level++) {
+		cout << "Current Level: " << level << endl;
+		for( int i = 0 ; i < levelnodes[level].size() ; i++) {
+			cout << levelnodes[level][i] << " ";
+		}
+		cout << endl;
+	}
+	
 	Graph::GraphNode child_left=NULL,child_right=NULL;
 	if(find_cut(gnodes[map["s0"]],child_left,child_right)){
 		cout<<"Src node:"<<g.getData(gnodes[map["s0"]]).label_type << endl;
 		cout<<"Child node 1:"<<g.getData(child_left).label_type << endl;
 		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
 	}
-
-	//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
-	//	cout << "equal nodes"<<endl;
-	checkxor(gnodes[map["s0"]]);
-	checkxor(gnodes[map["n14"]]);
-	//checkxor(gnodes[map["s1"]]);
-	//checkxor(gnodes[map["s2"]]);
-
-	//checkxnor(gnodes[map["s0"]]);
+	
 	if(checkxor(gnodes[map["s0"]])){
 		convertxor_cost(gnodes[map["s0"]]);
 	}
+
+    /** Shows that it works
+		//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
+		//	cout << "equal nodes"<<endl;
+		checkxor(gnodes[map["s0"]]);
+		checkxor(gnodes[map["n14"]]);
+		//checkxor(gnodes[map["s1"]]);
+		//checkxor(gnodes[map["s2"]]);
 	
-	printGraph();
-
-	if(checkxor(gnodes[map["n14"]])){
-		convertxor_cost(gnodes[map["n14"]]);
-	}
-
-	//cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
-
-	printGraph();
-
-	if(checkxor(gnodes[map["s1"]])){
-		convertxor_cost(gnodes[map["s1"]]);
-	}
-
-	printGraph();
+		//checkxnor(gnodes[map["s0"]]);
+		if(checkxor(gnodes[map["s0"]])){
+			convertxor_cost(gnodes[map["s0"]]);
+		}
+		
+		printGraph();
+	
+		if(checkxor(gnodes[map["n14"]])){
+			convertxor_cost(gnodes[map["n14"]]);
+		}
+	
+		//cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
+	
+		printGraph();
+	
+		if(checkxor(gnodes[map["s1"]])){
+			convertxor_cost(gnodes[map["s1"]]);
+		}
+	
+		printGraph();
+	*/
 
 	return 0;
 }
