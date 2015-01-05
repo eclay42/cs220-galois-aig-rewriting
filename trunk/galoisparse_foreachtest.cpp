@@ -156,7 +156,7 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 					//nodes[node_index].type = nd;
 					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
 				}
-				cout<<"Check ----> "<< fields[i].substr(0,fields[i].length()-1) <<endl;
+				//cout<<"Check ----> "<< fields[i].substr(0,fields[i].length()-1) <<endl;
 				//remove last char b/c its ',' or ';'
 				map[fields[i].substr(0,fields[i].length()-1)] = node_index;
 				//gnodes[node_index] = g.createNode(nodes[node_index]);
@@ -197,7 +197,7 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 			g.getEdgeData(g.addEdge(gnodes[map[f5]]
 										   ,gnodes[map[f1]])) = 2;
 
-			cout << fields[1] << fields[3] << fields[5] << endl;
+			//cout << fields[1] << fields[3] << fields[5] << endl;
 			g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f1+"_out"]])) = 2; //****Hack*** Use edge iterators for identifying final nodes
 
 			level1 = g.getData(gnodes[map[f3]]).level;
@@ -295,17 +295,16 @@ bool checkxor(Graph::GraphNode node){
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
-	cout<<"Inside condn inode"<<endl;
 	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
 		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
-			cout << "nequal edges\n";
+			//cout << "nequal edges\n";
 			if(g.getEdgeData(g.findEdge(input2,inode1))!=g.getEdgeData(g.findEdge(input4,inode2))){
-				cout << "true\n";
+				//cout << "true\n";
 				return true;
 			}
 		}
 	}
-	cout<<"false\n";
+	//cout<<"false\n";
 	return false;
 }
 /*
@@ -325,9 +324,9 @@ void convertxor_cost(Graph::GraphNode node){
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(input1,inode1))==2){
-		cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
+		//cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
 		g.getEdgeData(g.addEdge(input1,inode1))=1;
-		cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;		
+		//cout<<"Changed edge data "<<g.getEdgeData(g.findEdge(input1,inode1))<<endl;		
 	}
 	else
 		g.getEdgeData(g.addEdge(input2,inode1))=1;
@@ -338,7 +337,7 @@ void convertxor_cost(Graph::GraphNode node){
 		g.getEdgeData(g.addEdge(input4,inode2))=2;
 
 	for (Graph::edge_iterator edge : g.out_edges(node)){
-		cout<<"Node: "<<g.getData(node).label_type<<" -> "<<g.getData(g.getEdgeDst(edge)).label_type<<"Weight ="<< g.getEdgeData(edge)<<endl;
+		//cout<<"Node: "<<g.getData(node).label_type<<" -> "<<g.getData(g.getEdgeDst(edge)).label_type<<"Weight ="<< g.getEdgeData(edge)<<endl;
 		if(g.getEdgeData(edge) == 2)
 			g.getEdgeData(edge) = 1;
 		else if(g.getEdgeData(edge) == 1)
@@ -350,12 +349,12 @@ void convertxor_cost(Graph::GraphNode node){
 		Graph::GraphNode dst = g.getEdgeDst(edge);
 		if((g.getData(dst).label_type != g.getData(inode1).label_type) &&  (g.getData(dst).label_type != g.getData(inode2).label_type)){
 			if(isEqualNodes(dst,inode1)){
-				cout<<"Match found: "<< g.getData(dst).label_type <<endl;
+				//cout<<"Match found: "<< g.getData(dst).label_type <<endl;
 				make_replacement(inode1,dst);
 				cost++;
 			}
 			else if(isEqualNodes(dst,inode2)){
-				cout<<"Match found: "<< g.getData(dst).label_type <<endl;
+				//cout<<"Match found: "<< g.getData(dst).label_type <<endl;
 				make_replacement(inode2,dst);
 				cost++;
 			}
@@ -364,8 +363,17 @@ void convertxor_cost(Graph::GraphNode node){
 }
 struct Process { 
 	void operator()(Graph::GraphNode src, Galois::UserContext<Graph::GraphNode>& ctx) {  
-		cout<<"Node:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
-		ctx.breakLoop();
+		/*if(g.getData(src).label_type=="n15"){
+			sleep(10);
+			ctx.breakLoop();
+		}*/
+		
+		//cout<<"Node:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
+		if(checkxor(src)){
+		convertxor_cost(src);
+	}
+		
+		//ctx.breakLoop();
 		
 		
 	}
@@ -375,13 +383,14 @@ int main(int argc, char *argv[]) {
 	Galois::StatManager statManager;
 	unordered_map <string, int> map;
 	priority_queue<Graph::GraphNode,vector<Graph::GraphNode>, CompareNodelevel> pq;
-	if ( argc != 2 ){
-    	cout<<"usage: "<< argv[0] <<" <filename>\n";
+	if ( argc != 3 ){
+    	cout<<"usage: "<< argv[0] <<" <filename> <Num of Threads>\n";
 		return 0;
 	}
-  	else
-  			parseFileintoGraph(argv[1],map);
-
+ 
+  	parseFileintoGraph(argv[1],map);
+	unsigned int numThreads = atoi(argv[2]);
+	numThreads = Galois::setActiveThreads(numThreads);
 	//cout << g.getData(gnodes[0]).label_type << endl;
 	// Traverse graph
  	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
@@ -405,17 +414,19 @@ int main(int argc, char *argv[]) {
  	}
 	
 	int level=2;
+	vector<Graph::GraphNode> temp;
 	while (! pq.empty()) {
-		
-		vector<Graph::GraphNode> temp;
+		cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 		while(g.getData(pq.top()).level==level){
-			 cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+			 cout<<"Node inside level while 2"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			 temp.push_back(pq.top());
 			 pq.pop();
+			 if(pq.empty())
+					break;
 		}		
         Galois::for_each(temp.begin(),temp.end(),Process());
 		temp.erase(temp.begin(),temp.end());
-		cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
+		//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
 		level++;
     }
 	
@@ -489,6 +500,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	T.stop();
+*/
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
@@ -503,6 +515,6 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
-*/
+
 	return 0;
 }
