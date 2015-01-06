@@ -32,23 +32,38 @@
 \maketitle
 
 \begin{abstract}
-We present a method to parallelize the DAG-Aware AIG Rewriting algorithm introduced at UC Berkeley in 2006 \cite{DAG}.  This particular algorithm is responsible for simplifying an and-interter-graph (AIG) by replacing equivalent 4-input cuts with smaller, logically equivalent counterparts.  However, the implemented algorithm in ABC\cite{DAG} can be improved since it may run slowly on very large inputs.\\\indent
-In this paper we use the Galois System\cite{GALOIS} to build an AIG from a Verilog input file and perform a modified version of the rewriting algorithm run in parallel.  The parallelism is done by processing groups of nodes in separate threads based on their level.  This method has the potential to run quicker than the original rewriting algorithm.
+We present a method to parallelize the DAG-Aware AIG Rewriting algorithm introduced at UC Berkeley in 2006 \cite{DAG} using the Galois Framework\cite{GALOIS}.  This particular algorithm is responsible for simplifying an and-inverter-graph (AIG) by replacing 4-input cuts with smaller, logically equivalent counterparts.  The ABC\cite{DAG} tool implements this algorithm, however it has a reputation of being somewhat slow on very large inputs.\\\indent
+In this project our goal was to use the Galois Framework\cite{GALOIS} as a platform for the AIG Rewriting algorithm in an attempt to exploit the parallelism present in the graph to improve performance.
 \end{abstract}
 
 \section{Introduction}
-It is important to achieve as efficient of a circuit as possible when manufactoring hardware or mapping onto an FPGA.  Factors such as critical path delay, amount of resources available, and overall performance coincide with the efficiency of a circuit.\\\indent
-A way to be efficient is to reduce large logical components with smaller, equivalent ones.  This can be achieved using AIG rewriting proposed at UC Berkeley in 2006 \cite{DAG}.  This algorithm is implemented in the ABC tool built by the authors of this algorithm.\\\indent
-The current algorithm ABC rewriting algorithm does not utilize any parallelization and thus may have a long execution time for very large AIGs.  We introduce in this paper a modified version of the rewriting algorithm to exploit parallelism using the Galois graph framework \cite{GALOIS}.
+Logic circuits continue to grow in size and complexity and the data structures traditionally used to represent them are struggling to keep up. The AIG format is not a new idea, but in recent years it has seen a resurgence in popularity due to the compactness of the format.\\\indent
+Converting a circuit to an AIG produces a lot of redundancy in the initial AIG which necessitates further steps to simplify the graph. This can be achieved using AIG rewriting proposed at UC Berkeley in 2006 \cite{DAG}.  This algorithm is implemented in the ABC tool built by the authors of this algorithm.\\\indent
+The current implementation of the AIG Rewriting algorithm in ABC does not appear to exploit the fact that most of the cuts in the graph are not overlapping and can be processed in parallel.  The goal of our project is to utilize the robust parallelization provided by the Galois Framework\cite{GALOIS} to build a fast, parallelized implementation of the AIG Rewriting algorithm.
 
 \section{Background}
 \subsection{ABC}
-ABC is a software platform that provides many algorithms related to operating on AIGs, provides an environment to implement custom algorithms, and provides an interface to run these algorithms.  The algorithm this paper is concerned with that ABC supports is rewriting, although it also supports variations of rewriting known as balancing and refactoring.
+ABC is an open-source logic synthesis and verification system. It has functions to import logic circuits in many formats, simplify and verify them, and write the resulting output in common formats.  Most importantly, it has full AIG support and can convert an imported logic circuit into an AIG and write the AIG out to a file.  The AIG Rewriting algorithm is implemented in ABC as the rewrite, refactor, and balance functions.
 \subsection{Galois}
-Galois is an open-source shared-memory graph-processing system\cite{GALOIS}.  One of its purposes is to take ordinary, sequential graph-processing algorithms and parallelize them using framework-provided Galois constructs.\newline\indent
+Galois is an open-source shared-memory graph-processing system\cite{GALOIS}.  One of its purposes is to take ordinary, sequential graph-processing algorithms and parallelize them using framework-provided Galois data structures.\newline\indent
 Galois executes loops in parallel where the programmer must specify a worklist of nodes or edges to process.  A loop that would normally execute sequentially can execute in parallel with the internal use of multiple threads.
-\section{Parallel Rewriting}
-The following is the psudocode for our parallel implementation of rewriting in Galois.
+\section{Implementation}
+Our implementation consists of two parts: a Verilog parser to read the circuit into an AIG, and the Galois-based AIG Rewriting algorithm. ABC has a structural hashing function that creates an AIG from a logic circuit which can then be written to a Verilog file as a series of AND gates, which is read by the parser and used to populate our program's internal representation of the AIG. There are some AIG specific binary formats supported by ABC, but these are poorly documented and not human readable so we chose to go with Verilog instead.\newline\indent
+Internally, our program uses a Galois FirstGraph to represent the AIG. The FirstGraph structure is a template that supports essentially any data type, in our program it is a directed graph with our own Node struct as the node datatype that allows us to have multiple data fields for each node such as the node name and type (i.e. primary input, primary output, or intermediate node). All the edges are double edges (i.e. for every directed edge to a node, there is a matching back edge that goes the opposite direction) to allow backtracing, and each edge is weighted to indicate whether it is inverted or not or if it is a back edge.
+\subsection{Pseudocode}
+Parse input file into graph\\
+For each node in graph (note: Galois parallelizes this loop)\newline\indent
+Find cut\newline\indent
+If cheaper equivalent cut exists\newline\indent\indent
+Replace cut
+\section{Results}
+Unfortunately, our project was not entirely successful. The program runs, can generate an AIG from a Verilog file and can find a 4 input cut for each node, but we were unable to implement the equivalent cut lookup and substitution. Currently, the program is hardcoded to look for a specific cut (an xor gate) and replace it with a known equivalent instead of being able to use a generalized lookup mechanism to automatically determine equivalent cuts and substitute them and determine if it will result in a cost reduction. As a result of this, our program is not fully implementing the algorithm and any performance comparisions with ABC would be invalid.
+\subsection{Challenges}
+By far the biggest challenge in this project was the near absent documentation on both ABC and Galois. It took a significant amount of time to even get started because there was so little information to go on beyond the paper that presented the AIG Rewriting algorithm. Getting the AIG into our program from ABC was also a challenge since it is still a relatively obscure format and we ended up having to write our own parser. Parallelization was also an issue, again because the thread-safe Galois data structures required for the parallelization to work are so poorly documented. Finally, we still have the major issue of not being able to properly substitute one cut for another. We were able to identify equivalent cuts, however we were not able to find a way to automatically substitute one cut for another without resorting to hardcoding the graph manipulations.
+\section{Conclusion}
+Based on our experience with this project, I would say that our initial goal is still valid and may result in a significant performance improvement. Unfortunately the time limits imposed by a half-quarter project combined with our inexperience and lack of documentation on the tools we were using means we were not able to realize a full implementation.\newline\indent
+\subsection{Further Work}
+Obviously, the first goal of anyone wishing to continue this would be to get the algorithm working correctly on the Galois framework, specifically with the cut replacements. Additionally, replacing the Verilog parser with code to read (and write) one of the binary AIG formats would enable seamless interoperability with ABC and other tools. Write documentation once everything is working so others can understand how it works.
 \bibliographystyle{acm}
 \bibliography{bibfile}
 \end{document}
