@@ -400,10 +400,10 @@ int main(int argc, char *argv[]) {
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
 		cout <<" level: "<<g.getData(src).level;
-		
+		/*
 		if(g.getData(src).level > 1)
 						pq.push(src);
-		
+		*/
 
 		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
@@ -414,15 +414,17 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
-	
+
+	cout << "2nd print";
+/*
 	//prints what? nodes being refactored?
 	//does what?
 	int level=2;
 	vector<Graph::GraphNode> temp;
 	while (! pq.empty()) {
-		cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+		//cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 		while(g.getData(pq.top()).level==level){
-			 cout<<"Node inside level while 2"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+			// cout<<"Node inside level while 2"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			 temp.push_back(pq.top());
 			 pq.pop();
 			 if(pq.empty())
@@ -433,7 +435,7 @@ int main(int argc, char *argv[]) {
 		//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
 		level++;
     }
-	
+	*/
 	
 	/*
  	if(checkWorkability(gnodes[map["n15"]]))
@@ -506,6 +508,7 @@ int main(int argc, char *argv[]) {
 	T.stop();
 */
 
+	/*
 	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
@@ -521,6 +524,6 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
-
+*/
 	return 0;
 }
