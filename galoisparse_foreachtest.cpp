@@ -182,10 +182,25 @@ void parseAssign(unordered_map <string, int> &map){
 	{	//Edge weight: 2- Negative 1 - Positive
 		f3 = f3.substr(0,f3.length());
 		f5 = f5.substr(0,f5.length()-1);
-		g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
-									   ,gnodes[map[f1]])) = 2;//dest
+		size_t invertf3 = f3.find_first_of('~');
+		size_t invertf5 = f5.find_first_of('~');
+		if(invertf3 != string::npos){
+			f3 = f3.substr(1,f3.length());
 
-		g.getEdgeData(g.addEdge(gnodes[map[f5]]
+			g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
+									   ,gnodes[map[f1]])) = 1;//dest
+		}
+		else
+			g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
+												   ,gnodes[map[f1]])) = 2;//dest
+		if(invertf5 != string::npos){
+			f5 = f5.substr(1,f5.length());
+			g.getEdgeData(g.addEdge(gnodes[map[f5]]
+									,gnodes[map[f1]])) = 1;
+		}
+
+		else
+			g.getEdgeData(g.addEdge(gnodes[map[f5]]
 									   ,gnodes[map[f1]])) = 2;
 
 		//cout << fields[1] << fields[3] << fields[5] << endl;
@@ -468,6 +483,12 @@ bool checkxor(Graph::GraphNode node){
 	//cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
+	/*
+	cout << "got children\n";
+	cout <<"node "<< g.getData(node).label_type << "\n";
+	cout <<"child1 "<< g.getData(inode1).label_type << "\n";
+	cout <<"child2 "<< g.getData(inode2).label_type << "\n";
+	*/
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
 	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
 		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
@@ -590,7 +611,6 @@ int main(int argc, char *argv[]) {
 	numThreads = Galois::setActiveThreads(numThreads);
 	//cout << g.getData(gnodes[0]).label_type << endl;
 	// Traverse graph
- 	//for (Graph::iterator ii = g.begin(), ei = g.end(); ii != ei; ++ii) {
 
 	//print graph first time
 	for ( Graph::GraphNode src : g){
@@ -608,12 +628,9 @@ int main(int argc, char *argv[]) {
      		cout <<" dest: "<< g.getData(dst).label_type;
      		int edgeData = g.getEdgeData(edge);
      		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
    		}
 	   	cout <<endl;
  	}
-
-	//cout << "2nd print";
 
 	//prints what? nodes being refactored?
 	//does what?
@@ -628,7 +645,7 @@ int main(int argc, char *argv[]) {
 			 if(pq.empty())
 				break;
 		}
-	#ifdef FOREACHTEST		
+	#ifdef FOREACHTEST
         	Galois::for_each(temp.begin(),temp.end(),Process());
 	#else
 		Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
@@ -640,7 +657,7 @@ int main(int argc, char *argv[]) {
 	
 	
 
-	
+	cout << "print\n";
 	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
