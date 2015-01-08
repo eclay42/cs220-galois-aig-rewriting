@@ -9,17 +9,22 @@
 //#include <cstring>
 #include <string>
 #include <fstream>
+#include "Galois/Runtime/ll/PaddedLock.h"
 using namespace std;
 using namespace boost;
 
+#define FOREACHTEST 0
+
 typedef enum{pi,po,nd,op} node_type;
+typedef Galois::Runtime::LL::PaddedLock<true> Lock_ty;
+
+Lock_ty mutex;
 
 struct Node {
  string label_type;//a0,b0...
  node_type type;// pi,po,nd
  bool simplified;
- int fanins; // Not required as of now
- bool fanout; //Not required as of now
+ //Lock_ty& mutex;
  int level;
  };
 
@@ -52,7 +57,8 @@ public:
 			{
 				if(g.getData(src2).level <= g.getData(src1).level)
 					return true;
-					return false;
+					
+				return false;
 			}
 };
 
@@ -459,7 +465,7 @@ bool checkxor(Graph::GraphNode node){
 	Graph::GraphNode inode1=NULL,inode2=NULL;
 	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
 	getChildren(node,inode1,inode2);
-	cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
+	//cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
@@ -529,8 +535,29 @@ void convertxor_cost(Graph::GraphNode node){
 		}
 	}
 }
+
+#ifdef FOREACHTEST
 struct Process { 
 	void operator()(Graph::GraphNode src, Galois::UserContext<Graph::GraphNode>& ctx) {  
+		/*if(g.getData(src).label_type=="n15"){
+			sleep(10);
+			ctx.breakLoop();
+		}*/
+		mutex.lock();
+		//cout<<"Node:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
+		if(checkxor(src)){
+			convertxor_cost(src);
+		}
+		mutex.unlock();
+		//ctx.breakLoop();
+		
+		
+	}
+};
+#else
+struct Process { 
+	void operator()(Graph::GraphNode src) { 
+		cout<<"Inside proess from do_all"<<endl; 
 		/*if(g.getData(src).label_type=="n15"){
 			sleep(10);
 			ctx.breakLoop();
@@ -538,18 +565,20 @@ struct Process {
 		
 		//cout<<"Node:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
 		if(checkxor(src)){
-		convertxor_cost(src);
-	}
+			//convertxor_cost(src);
+		}
 		
 		//ctx.breakLoop();
 		
 		
 	}
 };
+#endif
 
 int main(int argc, char *argv[]) {
 	Galois::StatManager statManager;
 	unordered_map <string, int> map;
+	//Lock_ty mutex;
 	priority_queue<Graph::GraphNode,vector<Graph::GraphNode>, CompareNodelevel> pq;
 	if ( argc != 3 ){
     	cout<<"usage: "<< argv[0] <<" <filename> <Num of Threads>\n";
@@ -568,10 +597,11 @@ int main(int argc, char *argv[]) {
    		//Graph::GraphNode src = *ii;
 		cout <<"src: "<< g.getData(src).label_type;
 		cout <<" level: "<<g.getData(src).level;
-		/*
+		
+		//g.getData(src).mutex = mutex;
 		if(g.getData(src).level > 1)
-						pq.push(src);
-		*/
+			pq.push(src);
+		
 
 		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
@@ -583,8 +613,8 @@ int main(int argc, char *argv[]) {
 	   	cout <<endl;
  	}
 
-	cout << "2nd print";
-/*
+	//cout << "2nd print";
+
 	//prints what? nodes being refactored?
 	//does what?
 	int level=2;
@@ -592,91 +622,25 @@ int main(int argc, char *argv[]) {
 	while (! pq.empty()) {
 		//cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 		while(g.getData(pq.top()).level==level){
-			// cout<<"Node inside level while 2"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+			 //cout<<"Node inside level while 2 loop "<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			 temp.push_back(pq.top());
 			 pq.pop();
 			 if(pq.empty())
-					break;
-		}		
-        Galois::for_each(temp.begin(),temp.end(),Process());
+				break;
+		}
+	#ifdef FOREACHTEST		
+        	Galois::for_each(temp.begin(),temp.end(),Process());
+	#else
+		Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
+	#endif
 		temp.erase(temp.begin(),temp.end());
 		//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
 		level++;
     }
-	*/
 	
-	/*
- 	if(checkWorkability(gnodes[map["n15"]]))
- 		cout << "1 output"<<endl;
- 	else
- 		cout <<"more than 1 output"<<endl;
-
-	bool out;
-	Graph::GraphNode child_left=NULL,child_right=NULL;
-	if(find_cut(gnodes[map["s0"]],child_left,child_right)){
-		cout<<"Src node:"<<g.getData(gnodes[map["s0"]]).label_type << endl;
-		cout<<"Child node 1:"<<g.getData(child_left).label_type << endl;
-		cout<<"Child node 2:"<<g.getData(child_right).label_type << endl;
-	}
-
-	//if(isEqualNodes(gnodes[map["n8"]],gnodes[map["n8"]]))
-	//	cout << "equal nodes"<<endl;
-	checkxor(gnodes[map["s0"]]);
-	checkxor(gnodes[map["n14"]]);
-	//checkxor(gnodes[map["s1"]]);
-	//checkxor(gnodes[map["s2"]]);
-
-	Galois::StatTimer T("TotalTime");
-  	T.start();
-	//checkxnor(gnodes[map["s0"]]);
-	if(checkxor(gnodes[map["s0"]])){
-		convertxor_cost(gnodes[map["s0"]]);
-	}
 	
-	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
 
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
- 	}
-
-	if(checkxor(gnodes[map["n14"]])){
-		convertxor_cost(gnodes[map["n14"]]);
-	}
-
-	//cout<<"Edge from a0 to n8 "<<g.getEdgeData(g.findEdge(gnodes[map["a0"]],gnodes[map["n8"]]))<<endl;
-
-	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
-
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
- 	}	
-
-	if(checkxor(gnodes[map["s1"]])){
-		convertxor_cost(gnodes[map["s1"]]);
-	}
-
-	T.stop();
-*/
-
-	/*
+	
 	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
@@ -692,6 +656,6 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
-*/
+
 	return 0;
 }
