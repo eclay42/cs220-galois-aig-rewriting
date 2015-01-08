@@ -61,6 +61,12 @@ For each node in graph (note: Galois parallelizes this loop)\newline\indent
 Find cut\newline\indent
 If cheaper equivalent cut exists\newline\indent\indent
 Replace cut
+\subsection{NPN Equivalence Classes}
+Part of the code searches for an equivalent cut to replace.  The equivalent cut should be smaller in size compared to the original cut.  As part of the project, we created a script that generated equivalence classes among all possible 4-input cuts.  The following is an example of an equivalence class that was discovered:\\
+\begin{equation}
+(a'b)'(a'c), a'b'a'c, (a'b')(a'c')', (a)'(b'c), a'b'c
+\end{equation}
+In this example, each boolean function has equivalent outputs regardless of their inputs, i.e., have the same truth table.  If $(a'b)'(a'c)$ is a cut, it should be replaced with either $(a)'(b'c)$ or $a'b'c$ because one less input is involved.  However, our current implementation only supports replacing one such pattern, namely the XOR pattern despite having other classes available.
 \section{Results}
 Type results here...
 \section{Conclusion}
