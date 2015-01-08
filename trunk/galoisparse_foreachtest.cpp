@@ -240,7 +240,7 @@ void parseAssign(unordered_map <string, int> &map){
 void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	ifstream fin;
 	string previous = "";
-	Node output;
+	//Node output;
 	fin.open(inFile); // open a file
 	if (!fin.good()){
 		cout << "file not found\n";
