@@ -483,12 +483,12 @@ bool checkxor(Graph::GraphNode node){
 	//cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
-	/*
+
 	cout << "got children\n";
 	cout <<"node "<< g.getData(node).label_type << "\n";
 	cout <<"child1 "<< g.getData(inode1).label_type << "\n";
 	cout <<"child2 "<< g.getData(inode2).label_type << "\n";
-	*/
+
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
 	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
 		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
@@ -646,7 +646,7 @@ int main(int argc, char *argv[]) {
 				break;
 		}
 	#ifdef FOREACHTEST
-        	Galois::for_each(temp.begin(),temp.end(),Process());
+        Galois::for_each(temp.begin(),temp.end(),Process());
 	#else
 		Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
 	#endif
