@@ -98,9 +98,148 @@ bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNod
 	else 
 		return false;
 }
+void parseInput(unordered_map <string, int> &map, unsigned i){
+	Node n;
+	for(i;i<fields.size();i++){
+		if(fields[i].size()>1){
+			n.type = pi;
+			n.level = 0;
+			n.label_type = fields[i].substr(0,fields[i].length()-1);
+			//remove last char b/c its ',' or ';'
+			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			//gnodes[node_index] = g.createNode(nodes[node_index]);
+			gnodes.push_back(g.createNode(n));
+
+			g.addNode(gnodes[gnodes.size()-1]);
+			//cout << "node index: "<< node_index<<endl;
+			node_index++;
+		}
+
+	}
+}
+void parseOutput(unordered_map <string, int> &map, unsigned i){
+	Node n, output;
+	for(i ;i<fields.size();i++){
+		if(fields[i].size()>1){
+			n.type = po;
+			n.level = -1;
+			n.label_type = fields[i].substr(0,fields[i].length()-1);
+
+			output.type = op;
+			output.level = -2;
+			output.label_type = n.label_type+"_out";
+			//remove last char b/c its ',' or ';'
+			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			//gnodes[node_index] = g.createNode(nodes[node_index]);
+			gnodes.push_back(g.createNode(n));
+			g.addNode(gnodes[gnodes.size()-1]);
+			//cout << "node index: "<< node_index<<endl;
+			node_index++;
+
+			map[output.label_type] = node_index;
+			gnodes.push_back(g.createNode(output));
+			g.addNode(gnodes[gnodes.size()-1]);
+
+			g.getEdgeData(g.addEdge(gnodes[node_index-1],gnodes[node_index])) = 1;
+			node_index++;
+		}
+
+	}
+}
+
+void parseWire(unordered_map <string, int> &map, unsigned i){
+	Node n;
+	for(i;i<fields.size();i++){
+		if(fields[i].size()>1){
+			n.type = nd;
+			n.level = -2;
+			n.label_type = fields[i].substr(0,fields[i].length()-1);
+			//remove last char b/c its ',' or ';'
+			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			//gnodes[node_index] = g.createNode(nodes[node_index]);
+			gnodes.push_back(g.createNode(n));
+
+			g.addNode(gnodes[gnodes.size()-1]);
+			//cout << "node index: "<< node_index<<endl;
+			node_index++;
+		}
+
+	}
+}
+void parseAssign(unordered_map <string, int> &map){
+	int level1,level2;
+	string f1,f3,f5;
+	f1 = fields[1];
+	f3 = fields[3];
+	f5 = fields[5];
+	if(fields[4].compare("|") == 0)
+	{	//Edge weight: 2- Negative 1 - Positive
+		f3 = f3.substr(0,f3.length());
+		f5 = f5.substr(0,f5.length()-1);
+		g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
+									   ,gnodes[map[f1]])) = 2;//dest
+
+		g.getEdgeData(g.addEdge(gnodes[map[f5]]
+									   ,gnodes[map[f1]])) = 2;
+
+		//cout << fields[1] << fields[3] << fields[5] << endl;
+		g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f1+"_out"]])) = 2; //****Hack*** Use edge iterators for identifying final nodes
+
+		level1 = g.getData(gnodes[map[f3]]).level;
+		level2 = g.getData(gnodes[map[f5]]).level;
+		g.getEdgeData(g.addEdge(gnodes[map[f1]],
+				  gnodes[map[f3]])) = 3;//back edges to determine fanins -> wt. = 3
+		g.getEdgeData(g.addEdge(gnodes[map[f1]],
+				  gnodes[map[f5]])) = 3;//back edges to determins fanins -> wt. = 3
+	}
+
+	else
+	{	size_t invert = fields[3].find_first_of("~");
+		if (invert != string::npos){
+			f3 = f3.substr(1,f3.length());
+			//addEdge(src,dest)
+			//remove the '~' from the start of string
+			//map[string] returns node index to find which node
+			g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;//
+			level1 = g.getData(gnodes[map[f3]]).level;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
+		}
+		else{
+			g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
+			level1 = g.getData(gnodes[map[f3]]).level;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+					  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
+
+		}
+		invert = fields[5].find_first_of("~");
+		if (invert != string::npos){
+			f5 = f5.substr(1,f5.length()-2);
+			//remove first and last char b/c '~' to start and ';' at th
+			//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
+			g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 2;
+			level2 = g.getData(gnodes[map[f5]]).level;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+					  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
+		}
+		else{
+			f5 = f5.substr(0,f5.length()-1);
+			g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 1;
+			level2 = g.getData(gnodes[map[f5]]).level;
+			g.getEdgeData(g.addEdge(gnodes[map[f1]],
+					  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
+		}
+	}
+
+	if(level1>=level2)
+		g.getData(gnodes[map[fields[1]]]).level= level1+1;
+	else
+		g.getData(gnodes[map[fields[1]]]).level= level2+1;
+}
 
 void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	ifstream fin;
+	string previous = "";
 	Node output;
 	fin.open(inFile); // open a file
 	if (!fin.good()){
@@ -110,147 +249,176 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	else
 	// read each line of the file
 	while (!fin.eof())
-	{
-	// read an entire line into memory
-	string line;
-	getline(fin,line);
-	trim(line);
-	split(fields, line, is_any_of(" "));
-	Node n;
-	if(fields[0].compare("input") == 0 || fields[0].compare("output") == 0||fields[0].compare("wire") == 0)
-	{
-		for(unsigned i =1;i<fields.size();i++){
-			//add to hash map to index to corresponding node in array
-			if(fields[i].size()>1)
-			{
-				//Add data to each node for level and type of input
-				if(fields[0].compare("input") == 0)
-				{
-					n.type = pi;
-					n.level = 0;
-					n.label_type = fields[i].substr(0,fields[i].length()-1);
+		{
+		// read an entire line into memory
+		string line;
+		getline(fin,line);
+		trim(line);
+		split(fields, line, is_any_of(" "));
+		Node n;
 
-					//nodes[node_index].type = pi;
-					//nodes[node_index].level = 0;
-					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-				if(fields[0].compare("output") == 0)
+		if(fields[0].compare("input") == 0){
+			parseInput(map, 1);
+			previous = "input";
+		}
+		else if(fields[0].compare("output") == 0){
+			parseOutput(map, 1);
+		}
+		else if(fields[0].compare("wire") == 0){
+			parseWire(map, 1);
+			previous = "wire";
+		}
+		else if(fields[0].compare("assign") == 0){
+			parseAssign(map);
+			previous = "assign";
+		}
+		/*multiple lines gets 2nd line
+		 * eg Input a b c d
+		 * 			e f g h
+		 */
+		else if(previous.compare("input")==0){
+			parseInput(map, 0);
+		}
+		else if(previous.compare("output")==0){
+			parseOutput(map, 0);
+		}
+		else if(previous.compare("wire")==0){
+			parseWire(map, 0);
+		}
+		/*
+		if(fields[0].compare("input") == 0 || fields[0].compare("output") == 0||fields[0].compare("wire") == 0)
+		{
+
+			/*
+			for(unsigned i =1;i<fields.size();i++){
+				//add to hash map to index to corresponding node in array
+				if(fields[i].size()>1)
 				{
-					n.type = po;
-					n.level = -1;
-					n.label_type = fields[i].substr(0,fields[i].length()-1);
-				
+					//Add data to each node for level and type of input
+					if(fields[0].compare("input") == 0)
+					{
+						n.type = pi;
+						n.level = 0;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+
+					}
+					if(fields[0].compare("output") == 0)
+					{
+						n.type = po;
+						n.level = -1;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+
+
+						output.type = op;
+						output.level = -2;
+						output.label_type = n.label_type+"_out";
 					
-					output.type = op;
-					output.level = -2;
-					output.label_type = n.label_type+"_out";
-				
-					//nodes[node_index].type = po;
-					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-				if(fields[0].compare("wire") == 0)
-				{
-					n.type = nd;
-					n.level = -2;
-					n.label_type = fields[i].substr(0,fields[i].length()-1);
-					//nodes[node_index].type = nd;
-					//nodes[node_index].label_type = fields[i].substr(0,fields[i].length()-1);
-				}
-				//cout<<"Check ----> "<< fields[i].substr(0,fields[i].length()-1) <<endl;
-				//remove last char b/c its ',' or ';'
-				map[fields[i].substr(0,fields[i].length()-1)] = node_index;
-				//gnodes[node_index] = g.createNode(nodes[node_index]);
-				gnodes.push_back(g.createNode(n));
+					}
+					if(fields[0].compare("wire") == 0)
+					{
+						n.type = nd;
+						n.level = -2;
+						n.label_type = fields[i].substr(0,fields[i].length()-1);
+					}
+					//cout<<"Check ----> "<< fields[i].substr(0,fields[i].length()-1) <<endl;
+					//remove last char b/c its ',' or ';'
+					map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+					//gnodes[node_index] = g.createNode(nodes[node_index]);
+					gnodes.push_back(g.createNode(n));
 
-				g.addNode(gnodes[gnodes.size()-1]);
-				//cout << "node index: "<< node_index<<endl;
-				node_index++;
-				/*For storing output from the output node(No dangling edges on the final node) in the case that it is negated like in OR case*/
-				if(fields[0].compare("output") == 0)
-				{
-					map[output.label_type] = node_index;
-					gnodes.push_back(g.createNode(output));
 					g.addNode(gnodes[gnodes.size()-1]);
-					
-					g.getEdgeData(g.addEdge(gnodes[node_index-1],gnodes[node_index])) = 1;
+					//cout << "node index: "<< node_index<<endl;
 					node_index++;
+					//For storing output from the output node(No dangling edges on the final node) in the case that it is negated like in OR case
+					if(fields[0].compare("output") == 0)
+					{
+						map[output.label_type] = node_index;
+						gnodes.push_back(g.createNode(output));
+						g.addNode(gnodes[gnodes.size()-1]);
+
+						g.getEdgeData(g.addEdge(gnodes[node_index-1],gnodes[node_index])) = 1;
+						node_index++;
+					}
+				}
+
+			}
+
+		}
+		*/
+		//cout <<"compare assign"<<endl;
+		/*
+		if(fields[0].compare("assign") == 0)
+		{
+			int level1,level2;
+			string f1,f3,f5;
+			f1 = fields[1];
+			f3 = fields[3];
+			f5 = fields[5];
+			if(fields[4].compare("|") == 0)
+			{	//Edge weight: 2- Negative 1 - Positive
+				f3 = f3.substr(0,f3.length());
+				f5 = f5.substr(0,f5.length()-1);
+				g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
+											   ,gnodes[map[f1]])) = 2;//dest
+
+				g.getEdgeData(g.addEdge(gnodes[map[f5]]
+											   ,gnodes[map[f1]])) = 2;
+
+				//cout << fields[1] << fields[3] << fields[5] << endl;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f1+"_out"]])) = 2; //****Hack*** Use edge iterators for identifying final nodes
+	
+				level1 = g.getData(gnodes[map[f3]]).level;
+				level2 = g.getData(gnodes[map[f5]]).level;
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f3]])) = 3;//back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f1]],
+						  gnodes[map[f5]])) = 3;//back edges to determins fanins -> wt. = 3
+			}
+
+			else
+			{	size_t invert = fields[3].find_first_of("~");
+				if (invert != string::npos){
+					f3 = f3.substr(1,f3.length());
+					//addEdge(src,dest)
+					//remove the '~' from the start of string
+					//map[string] returns node index to find which node
+					g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;//
+					level1 = g.getData(gnodes[map[f3]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[f1]],
+								  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
+				}
+				else{
+					g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
+					level1 = g.getData(gnodes[map[f3]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[f1]],
+							  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
+
+				}
+				invert = fields[5].find_first_of("~");
+				if (invert != string::npos){
+					f5 = f5.substr(1,f5.length()-2);
+					//remove first and last char b/c '~' to start and ';' at th
+					//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
+					g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 2;
+					level2 = g.getData(gnodes[map[f5]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[f1]],
+							  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
+				}
+				else{
+					f5 = f5.substr(0,f5.length()-1);
+					g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 1;
+					level2 = g.getData(gnodes[map[f5]]).level;
+					g.getEdgeData(g.addEdge(gnodes[map[f1]],
+							  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
 				}
 			}
 
-		}
-	}
-	//cout <<"compare assign"<<endl;
-	if(fields[0].compare("assign") == 0)
-	{
-		int level1,level2;
-		string f1,f3,f5;
-		f1 = fields[1];
-		f3 = fields[3];
-		f5 = fields[5];
-		if(fields[4].compare("|") == 0)
-		{	//Edge weight: 2- Negative 1 - Positive
-			f3 = f3.substr(0,f3.length());
-			f5 = f5.substr(0,f5.length()-1);
-			g.getEdgeData(g.addEdge(gnodes[map[f3]]//src
-										   ,gnodes[map[f1]])) = 2;//dest
-
-			g.getEdgeData(g.addEdge(gnodes[map[f5]]
-										   ,gnodes[map[f1]])) = 2;
-
-			//cout << fields[1] << fields[3] << fields[5] << endl;
-			g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f1+"_out"]])) = 2; //****Hack*** Use edge iterators for identifying final nodes
-
-			level1 = g.getData(gnodes[map[f3]]).level;
-			level2 = g.getData(gnodes[map[f5]]).level;
-			g.getEdgeData(g.addEdge(gnodes[map[f1]],
-					  gnodes[map[f3]])) = 3;//back edges to determine fanins -> wt. = 3
-			g.getEdgeData(g.addEdge(gnodes[map[f1]],
-					  gnodes[map[f5]])) = 3;//back edges to determins fanins -> wt. = 3
-		}
-	
+		if(level1>=level2)
+			g.getData(gnodes[map[fields[1]]]).level= level1+1;
 		else
-		{	size_t invert = fields[3].find_first_of("~");
-			if (invert != string::npos){
-				f3 = f3.substr(1,f3.length());
-				//addEdge(src,dest)
-				//remove the '~' from the start of string
-				//map[string] returns node index to find which node
-				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;//
-				level1 = g.getData(gnodes[map[f3]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-							  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
-			}
-			else{
-				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
-				level1 = g.getData(gnodes[map[f3]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-						  gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
-
-			}
-			invert = fields[5].find_first_of("~");
-			if (invert != string::npos){
-				f5 = f5.substr(1,f5.length()-2);
-				//remove first and last char b/c '~' to start and ';' at th
-				//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
-				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 2;
-				level2 = g.getData(gnodes[map[f5]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
-			}
-			else{
-				f5 = f5.substr(0,f5.length()-1);
-				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 1;
-				level2 = g.getData(gnodes[map[f5]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
-			}
+			g.getData(gnodes[map[fields[1]]]).level= level2+1;
 		}
-
-	if(level1>=level2)
-		g.getData(gnodes[map[fields[1]]]).level= level1+1;
-	else
-		g.getData(gnodes[map[fields[1]]]).level= level2+1;
-	}
+		*/
 
 	}
 }
