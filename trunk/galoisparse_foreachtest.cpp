@@ -444,8 +444,6 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 	}
 }
 
-
-
 void getChildren(Graph::GraphNode parent, Graph::GraphNode &child1, Graph::GraphNode &child2){
 	bool  a = true;
 	for (Graph::edge_iterator edge : g.out_edges(parent)){
@@ -483,12 +481,12 @@ bool checkxor(Graph::GraphNode node){
 	//cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
-
+/*
 	cout << "got children\n";
 	cout <<"node "<< g.getData(node).label_type << "\n";
 	cout <<"child1 "<< g.getData(inode1).label_type << "\n";
 	cout <<"child2 "<< g.getData(inode2).label_type << "\n";
-
+*/
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
 	if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4))
 		if(g.getEdgeData(g.findEdge(input1,inode1))!=g.getEdgeData(g.findEdge(input3,inode2))){
@@ -518,6 +516,7 @@ void convertxor_cost(Graph::GraphNode node){
 	getChildren(node,inode1,inode2);
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
+
 	if(g.getEdgeData(g.findEdge(input1,inode1))==2){
 		//cout<<"Reassigning edge for "<<g.getData(input1).label_type<<g.getData(inode1).label_type<<endl;
 		g.getEdgeData(g.addEdge(input1,inode1))=1;
@@ -533,10 +532,12 @@ void convertxor_cost(Graph::GraphNode node){
 
 	for (Graph::edge_iterator edge : g.out_edges(node)){
 		//cout<<"Node: "<<g.getData(node).label_type<<" -> "<<g.getData(g.getEdgeDst(edge)).label_type<<"Weight ="<< g.getEdgeData(edge)<<endl;
+
 		if(g.getEdgeData(edge) == 2)
 			g.getEdgeData(edge) = 1;
 		else if(g.getEdgeData(edge) == 1)
 			g.getEdgeData(edge) = 2;
+
 	}
 
 	/*Compute cost*/
@@ -564,6 +565,7 @@ struct Process {
 			sleep(10);
 			ctx.breakLoop();
 		}*/
+		/* alex change
 		mutex.lock();
 		//cout<<"Node:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
 		if(checkxor(src)){
@@ -571,6 +573,13 @@ struct Process {
 		}
 		mutex.unlock();
 		//ctx.breakLoop();
+		 *
+		 */
+		if(checkxor(src)){
+			mutex.lock();
+			convertxor_cost(src);
+			mutex.unlock();
+		}
 		
 		
 	}
@@ -598,6 +607,7 @@ struct Process {
 
 int main(int argc, char *argv[]) {
 	Galois::StatManager statManager;
+	Galois::StatTimer T("total");
 	unordered_map <string, int> map;
 	//Lock_ty mutex;
 	priority_queue<Graph::GraphNode,vector<Graph::GraphNode>, CompareNodelevel> pq;
@@ -613,11 +623,12 @@ int main(int argc, char *argv[]) {
 	// Traverse graph
 
 	//print graph first time
+	/* alex */
 	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
+
 		cout <<"src: "<< g.getData(src).label_type;
 		cout <<" level: "<<g.getData(src).level;
-		
+
 		//g.getData(src).mutex = mutex;
 		if(g.getData(src).level > 1)
 			pq.push(src);
@@ -630,34 +641,37 @@ int main(int argc, char *argv[]) {
      		cout << " edge data " << edgeData;
    		}
 	   	cout <<endl;
+
  	}
+
 
 	//prints what? nodes being refactored?
 	//does what?
 	int level=2;
+
 	vector<Graph::GraphNode> temp;
-	while (! pq.empty()) {
+	while (!pq.empty()) {
+		cout << "level: " <<level<<'\n';
 		//cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
-		while(g.getData(pq.top()).level==level){
+		while(g.getData(pq.top()).level==level && !pq.empty()){
 			 //cout<<"Node inside level while 2 loop "<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			 temp.push_back(pq.top());
 			 pq.pop();
 			 if(pq.empty())
 				break;
 		}
-	#ifdef FOREACHTEST
-        Galois::for_each(temp.begin(),temp.end(),Process());
-	#else
-		Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
-	#endif
-		temp.erase(temp.begin(),temp.end());
-		//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
-		level++;
-    }
-	
-	
 
-	cout << "print\n";
+		#ifdef FOREACHTEST
+			Galois::for_each(temp.begin(),temp.end(),Process());
+		#else
+			Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
+		#endif
+			temp.erase(temp.begin(),temp.end());
+			//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
+			level++;
+    }
+
+	cout << "after changes\n";
 	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
@@ -673,6 +687,8 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
+
+
 
 	return 0;
 }
