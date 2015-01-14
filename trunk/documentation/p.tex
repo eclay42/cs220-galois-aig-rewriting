@@ -56,19 +56,33 @@ Once we have the graph structure, we iterate through all the nodes in a Galois p
 Once the cut for a given node is generated, its truth table is generated and compared against a list of equivalent cuts. If there is a logically equivalent cut that has a lower cost, the cut in the graph is exchanged for the simpler cut. Otherwise, the cut is either left unchanged or randomly swapped for a logically equivalent cut of the same cost (a zero-cost replacement) to possibly open up more options on future passes.\\\indent
 This algorithm is run on every node in the graph and ideally should be run many times to produce a better optimized circuit.
 \subsection{Pseudocode}
-For each level in graph\newline\indent
-For each node in level\newline\indent\indent
-Find cut\newline\indent\indent
-If cut is XNOR\newline\indent\indent\indent
-Convert to XOR\newline\indent\indent\indent
-Compute cost\\
-Report cost reduction
+\begin{algorithmic}[1]
+\STATE Parse input file into graph
+\FOR{each level in graph}
+\FOR{each node in graph \COMMENT{parallel in Galois}}
+\STATE Find cut
+\IF{cut is XNOR}
+\STATE Convert to XOR
+\STATE Compute cost
+\ENDIF
+\ENDFOR
+\ENDFOR
+\STATE Report cost reduction
+\end{algorithmic}
 \subsection{NPN Equivalence Classes}
 Part of the code searches for an equivalent cut to replace.  The equivalent cut should be smaller in size compared to the original cut.  As part of the project, we created a script that generated equivalence classes among all possible 4-input cuts.  The following is an example of an equivalence class that was discovered:\\
 \begin{equation}
 (a'b)'(a'c), a'b'a'c, (a'b')(a'c')', (a)'(b'c), a'b'c
 \end{equation}
-In this example, each boolean function has equivalent outputs regardless of their inputs, i.e., have the same truth table.  If $(a'b)'(a'c)$ is a cut, it should be replaced with either $(a)'(b'c)$ or $a'b'c$ because one less input is involved.  However, our current implementation only supports replacing one such pattern, namely the XOR pattern despite having other classes available.
+In this example, each boolean function has equivalent outputs regardless of their inputs, i.e., have the same truth table.  If $(a'b)'(a'c)$ is a cut, it should be replaced with either $(a)'(b'c)$ or $a'b'c$ because one less input is involved.  However, our current implementation only supports replacing one such pattern, namely the XOR pattern despite having other classes available (Figure~\ref{fig:Diagram}).
+
+\begin{figure}[t]
+\begin{center}
+\includegraphics[scale=.5]{Graph.png}
+\caption{XOR replacement.}
+\label{fig:Diagram}
+\end{center}
+\end{figure}
 \section{Results}
 Type results here...
 \section{Conclusion}
