@@ -467,7 +467,6 @@ void make_replacement(Graph::GraphNode node, Graph::GraphNode match_node){
 			g.getEdgeData(g.addEdge(node,temp))=g.getEdgeData(edge);
 			g.getEdgeData(g.addEdge(temp,node))=3;//Assigning back edges from the parent nodes of the removed copy node to the original node
 		}
-		
 	}
 	g.removeEdge(child1,g.findEdge(child1,match_node));
 	g.removeEdge(child2,g.findEdge(child2,match_node));
@@ -539,7 +538,6 @@ void convertxor_cost(Graph::GraphNode node){
 			g.getEdgeData(edge) = 2;
 
 	}
-
 	/*Compute cost*/
 	for (Graph::edge_iterator edge : g.out_edges(input1)){
 		Graph::GraphNode dst = g.getEdgeDst(edge);
@@ -556,6 +554,7 @@ void convertxor_cost(Graph::GraphNode node){
 			}
 		}
 	}
+
 }
 
 #ifdef FOREACHTEST
@@ -580,8 +579,6 @@ struct Process {
 			convertxor_cost(src);
 			mutex.unlock();
 		}
-		
-		
 	}
 };
 #else
@@ -597,10 +594,7 @@ struct Process {
 		if(checkxor(src)){
 			//convertxor_cost(src);
 		}
-		
 		//ctx.breakLoop();
-		
-		
 	}
 };
 #endif
@@ -623,9 +617,7 @@ int main(int argc, char *argv[]) {
 	// Traverse graph
 
 	//print graph first time
-	/* alex */
 	for ( Graph::GraphNode src : g){
-
 		cout <<"src: "<< g.getData(src).label_type;
 		cout <<" level: "<<g.getData(src).level;
 
@@ -633,7 +625,6 @@ int main(int argc, char *argv[]) {
 		if(g.getData(src).level > 1)
 			pq.push(src);
 		
-
 		for (Graph::edge_iterator edge : g.out_edges(src)) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
      		cout <<" dest: "<< g.getData(dst).label_type;
@@ -641,9 +632,7 @@ int main(int argc, char *argv[]) {
      		cout << " edge data " << edgeData;
    		}
 	   	cout <<endl;
-
  	}
-
 
 	//prints what? nodes being refactored?
 	//does what?
@@ -652,20 +641,25 @@ int main(int argc, char *argv[]) {
 	vector<Graph::GraphNode> temp;
 	while (!pq.empty()) {
 		cout << "level: " <<level<<'\n';
-		//cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+		cout<<"Node inside level "<<level<<": "<<g.getData(pq.top()).label_type<<endl;
 		while(g.getData(pq.top()).level==level && !pq.empty()){
+
 			 //cout<<"Node inside level while 2 loop "<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			 temp.push_back(pq.top());
 			 pq.pop();
 			 if(pq.empty())
 				break;
+			 cout << "next node: " << g.getData(pq.top()).label_type <<'\n';
+			 cout << "next node level: " << g.getData(pq.top()).level <<'\n';
 		}
-
+		cout << "size: " << temp.size() << '\n';
+		cout << "end node: "<<g.getData(temp[temp.size()-1]).label_type<<'\n';
 		#ifdef FOREACHTEST
 			Galois::for_each(temp.begin(),temp.end(),Process());
 		#else
 			Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname("Tyler"));
 		#endif
+			cout << "after process\n";
 			temp.erase(temp.begin(),temp.end());
 			//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
 			level++;
@@ -674,21 +668,22 @@ int main(int argc, char *argv[]) {
 	cout << "after changes\n";
 	//print graph after refactoring of nodes?
 	for ( Graph::GraphNode src : g){
-   		//Graph::GraphNode src = *ii;
-		cout <<"src: "<< g.getData(src).label_type;
-		cout <<" level: "<<g.getData(src).level;
 
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
-   			Graph::GraphNode dst = g.getEdgeDst(edge);
-     		cout <<" dest: "<< g.getData(dst).label_type;
-     		int edgeData = g.getEdgeData(edge);
-     		cout << " edge data " << edgeData;
-     		//assert(edgeData == 5);
-   		}
-	   	cout <<endl;
+		if(g.getData(src).type == po){
+			cout <<"src: "<< g.getData(src).label_type;
+			cout <<" level: "<<g.getData(src).level;
+
+			for (Graph::edge_iterator edge : g.out_edges(src)) {
+				Graph::GraphNode dst = g.getEdgeDst(edge);
+				cout <<" dest: "<< g.getData(dst).label_type;
+				int edgeData = g.getEdgeData(edge);
+				cout << " edge data " << edgeData;
+				//assert(edgeData == 5);
+			}
+			cout <<endl;
+		}
+
  	}
-
-
 
 	return 0;
 }
