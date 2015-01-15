@@ -114,15 +114,40 @@ void parseInput(unordered_map <string, int> &map, unsigned i){
 	Node n;
 	for(i;i<fields.size();i++){
 		if(fields[i].size()>1){
-			n.type = pi;
+		  n.type = pi;
 			n.level = 0;
-			n.label_type = fields[i].substr(0,fields[i].length()-1);
-			//remove last char b/c its ',' or ';'
-			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
-			//gnodes[node_index] = g.createNode(nodes[node_index]);
-			gnodes.push_back(g.createNode(n));
+		  size_t invert = fields[i].find_first_of(";");
+		  if (invert != string::npos){
+		    n.label_type = fields[i].substr(0,fields[i].length()-1);
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
 
-			g.addNode(gnodes[gnodes.size()-1]);
+			  g.addNode(gnodes[gnodes.size()-1]);
+			  continue;
+		  }
+		  invert = fields[i].find_first_of(",");
+		  if (invert != string::npos){
+		    n.label_type = fields[i].substr(0,fields[i].length()-1);
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
+
+			  g.addNode(gnodes[gnodes.size()-1]);
+		  }
+		  else{
+        n.label_type = fields[i].substr(0,fields[i].length());
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length())] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
+
+			  g.addNode(gnodes[gnodes.size()-1]);		  
+		  }
+			
+			
 			//cout << "node index: "<< node_index<<endl;
 			node_index++;
 		}
@@ -134,16 +159,38 @@ void parseOutput(unordered_map <string, int> &map, unsigned i){
 	Node n, output;
 	for(i ;i<fields.size();i++){
 		if(fields[i].size()>1){
-			n.type = po;
-			n.level = -1;
-			n.label_type = fields[i].substr(0,fields[i].length()-1);
-			n.output = true;
-			
-			//remove last char b/c its ',' or ';'
-			map[fields[i].substr(0,fields[i].length()-1)] = node_index;
-			//gnodes[node_index] = g.createNode(nodes[node_index]);
-			gnodes.push_back(g.createNode(n));
-			g.addNode(gnodes[gnodes.size()-1]);
+			n.type = pi;
+			n.level = 0;
+		  size_t invert = fields[i].find_first_of(";");
+		  if (invert != string::npos){
+		    n.label_type = fields[i].substr(0,fields[i].length()-1);
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
+
+			  g.addNode(gnodes[gnodes.size()-1]);
+			  continue;
+		  }
+		  invert = fields[i].find_first_of(",");
+		  if (invert != string::npos){
+		    n.label_type = fields[i].substr(0,fields[i].length()-1);
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length()-1)] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
+
+			  g.addNode(gnodes[gnodes.size()-1]);
+		  }
+		  else{
+        n.label_type = fields[i].substr(0,fields[i].length());
+			  //remove last char b/c its ',' or ';'
+			  map[fields[i].substr(0,fields[i].length())] = node_index;
+			  //gnodes[node_index] = g.createNode(nodes[node_index]);
+			  gnodes.push_back(g.createNode(n));
+
+			  g.addNode(gnodes[gnodes.size()-1]);		  
+		  }
 			//cout << "node index: "<< node_index<<endl;
 			node_index++;
 		}
@@ -524,8 +571,9 @@ int main(int argc, char *argv[]) {
     	cout<<"usage: "<< argv[0] <<" <filename> <Num of Threads>\n";
 		return 0;
 	}
- 
+  cout << "Parsing file " << argv[1] << endl;
   	parseFileintoGraph(argv[1],map);
+  cout << "Successfully parsed file" << endl;
 	unsigned int numThreads = atoi(argv[2]);
 	numThreads = Galois::setActiveThreads(numThreads);
 
@@ -538,21 +586,21 @@ int main(int argc, char *argv[]) {
 		
 		if(g.getData(src).level > 1)
 			pq.push(src);
-		
+  }		
 
-
-		for (Graph::edge_iterator edge : g.out_edges(src)) {
+  cout << "n282135: "<< g.getData(gnodes[map["n282135"]]).label_type <<'\n';
+		for (Graph::edge_iterator edge : g.out_edges(gnodes[map["n282135"]])) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
-	     		//cout <<" dest: "<< g.getData(dst).label_type;
+	     		cout <<" dest: "<< g.getData(dst).label_type;
      			int edgeData = g.getEdgeData(edge);
      			//Not printing the back edges which is used for accessing children
 			if(edgeData != 3){
-				//cout<<" dest: "<< g.getData(dst).label_type;
-				//cout<<" edge data: "<< edgeData;
+				cout<<" dest: "<< g.getData(dst).label_type;
+				cout<<" edge data: "<< edgeData << '\n';
 			}
    		}
 	   	//cout <<endl;
- 	}
+ 	//}
 
 
 	clock_t cstart = clock();
