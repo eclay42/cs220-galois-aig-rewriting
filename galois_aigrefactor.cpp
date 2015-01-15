@@ -530,11 +530,11 @@ int main(int argc, char *argv[]) {
 	numThreads = Galois::setActiveThreads(numThreads);
 
 	//Print graph first time
-	/*
+
 	for(Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
-		cout <<"Src: "<< g.getData(src).label_type;
-		cout <<" Level: "<<g.getData(src).level;
+		//cout <<"Src: "<< g.getData(src).label_type;
+		//cout <<" Level: "<<g.getData(src).level;
 		
 		if(g.getData(src).level > 1)
 			pq.push(src);
@@ -547,20 +547,20 @@ int main(int argc, char *argv[]) {
      			int edgeData = g.getEdgeData(edge);
      			//Not printing the back edges which is used for accessing children
 			if(edgeData != 3){
-				cout<<" dest: "<< g.getData(dst).label_type;
-				cout<<" edge data: "<< edgeData;
+				//cout<<" dest: "<< g.getData(dst).label_type;
+				//cout<<" edge data: "<< edgeData;
 			}
    		}
-	   	cout <<endl;
+	   	//cout <<endl;
  	}
- 	*/
+
 
 	clock_t cstart = clock();
 	clock_t cend = 0;
 	int level=2;
 	vector<Graph::GraphNode> temp;
 	while(!pq.empty()){
-		//cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
+		cout<<"Node inside level"<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 		while(g.getData(pq.top()).level==level && !pq.empty()){
 			//cout<<"Node inside level while 2 loop "<<level<<":"<<g.getData(pq.top()).label_type<<endl;
 			temp.push_back(pq.top());
