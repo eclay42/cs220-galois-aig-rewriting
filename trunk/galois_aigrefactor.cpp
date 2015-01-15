@@ -125,6 +125,7 @@ void parseInput(unordered_map <string, int> &map, unsigned i){
 			  gnodes.push_back(g.createNode(n));
 
 			  g.addNode(gnodes[gnodes.size()-1]);
+			  node_index++;
 			  continue;
 		  }
 		  invert = fields[i].find_first_of(",");
@@ -170,6 +171,7 @@ void parseOutput(unordered_map <string, int> &map, unsigned i){
 			  gnodes.push_back(g.createNode(n));
 
 			  g.addNode(gnodes[gnodes.size()-1]);
+			  node_index++;	
 			  continue;
 		  }
 		  invert = fields[i].find_first_of(",");
