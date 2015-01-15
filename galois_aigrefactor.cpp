@@ -264,11 +264,17 @@ void parseAssign(unordered_map <string, int> &map){
 				f3 = f3.substr(1,f3.length()-2);
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;
 				g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f3]])) = 3;
+				//alex adding levels
+				level2 = g.getData(gnodes[map[f3]]).level;
+				level1 = g.getData(gnodes[map[f3]]).level;
 			}
 			else{
 				f3 = f3.substr(0,f3.length()-1);
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
 				g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f3]])) = 3;
+				//alex adding levels
+				level2 = g.getData(gnodes[map[f3]]).level;
+				level1 = g.getData(gnodes[map[f3]]).level;
 			}
 		}
 		else if(fields.size() == 5){
@@ -277,11 +283,17 @@ void parseAssign(unordered_map <string, int> &map){
 				f3 = f3.substr(1,f3.length());
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;
 				g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f3]])) = 3;
+				//alex adding levels
+				level2 = g.getData(gnodes[map[f3]]).level;
+				level1 = g.getData(gnodes[map[f3]]).level;
 			}
 			else{
 				f3 = f3.substr(0,f3.length());
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
 				g.getEdgeData(g.addEdge(gnodes[map[f1]],gnodes[map[f3]])) = 3;
+				//alex adding levels
+				level2 = g.getData(gnodes[map[f3]]).level;
+				level1 = g.getData(gnodes[map[f3]]).level;
 			}
 		}
 		else{
@@ -518,6 +530,7 @@ int main(int argc, char *argv[]) {
 	numThreads = Galois::setActiveThreads(numThreads);
 
 	//Print graph first time
+	/*
 	for(Graph::GraphNode src : g){
    		//Graph::GraphNode src = *ii;
 		cout <<"Src: "<< g.getData(src).label_type;
@@ -532,7 +545,7 @@ int main(int argc, char *argv[]) {
    			Graph::GraphNode dst = g.getEdgeDst(edge);
 	     		//cout <<" dest: "<< g.getData(dst).label_type;
      			int edgeData = g.getEdgeData(edge);
-     			/*Not printing the back edges which is used for accessing children*/
+     			//Not printing the back edges which is used for accessing children
 			if(edgeData != 3){
 				cout<<" dest: "<< g.getData(dst).label_type;
 				cout<<" edge data: "<< edgeData;
@@ -540,6 +553,7 @@ int main(int argc, char *argv[]) {
    		}
 	   	cout <<endl;
  	}
+ 	*/
 
 	clock_t cstart = clock();
 	clock_t cend = 0;
@@ -573,6 +587,7 @@ int main(int argc, char *argv[]) {
 
 	cout << "Printing reduced graph \n";
 	//Print graph after refactoring of nodes
+	/*
 	for ( Graph::GraphNode src : g){
 		//Graph::GraphNode src = *ii;
 		cout <<"Src: "<< g.getData(src).label_type;
@@ -585,7 +600,7 @@ int main(int argc, char *argv[]) {
 			Graph::GraphNode dst = g.getEdgeDst(edge);
 			//cout<<" dest: "<< g.getData(dst).label_type;
 			int edgeData = g.getEdgeData(edge);
-			/*Not printing the back edges which is used for accessing children*/
+			//Not printing the back edges which is used for accessing children
 			if(edgeData != 3){
 				cout<<" dest: "<< g.getData(dst).label_type;
 				cout<<" edge data: "<< edgeData;
@@ -593,6 +608,7 @@ int main(int argc, char *argv[]) {
 		}
 		cout <<endl;
  	}
+ 	*/
 
 	cout<<"Algorithm execution time: "<<(((double)cend - (double)cstart)/CLOCKS_PER_SEC)<<endl;
 	cout<<"Number of nodes reduced: "<< refactor_cost<<endl;
