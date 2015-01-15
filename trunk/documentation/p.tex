@@ -95,21 +95,19 @@ To improve compatibility of this system with existing AIG software, native suppo
 Another related project that may be valuable would be to implement this same parallelization process for the algorithm on a many-core system (such as a GPU) instead of with the Galois Framework.
 \bibliographystyle{acm}
 \bibliography{bibfile}
-
+\onecolumn
 \begin {table}[T]
 \caption {Runtimes} \label{tab:title}
 \begin{center}
-\begin{tabular}{ |p{2cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}|p{1cm}| }
+\begin{tabular}{ |p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{1cm}|p{1cm}| }
 \hline
-\multicolumn{6}{|c|}{Algorithm runtimes (averaged over 10 iterations)} \\
+\multicolumn{6}{|c|}{Algorithm runtimes (averaged over 10 iterations)} & \multicolumn{2}{|c|}{Node Reduction}\\
 \hline
-Input file & ABC & gaig 1 & gaig 2 & gaig 4 & gaig 8 \\
+Input file & ABC & gaig 1 & gaig 2 & gaig 4 & gaig 8 & ABC & gaig\\
 \hline
-rca2 & t & t & t & t & t \\
-adder16 & t & t & t & t & t \\
-mult4 & t & t & t & t & t \\
-\hline
-Reduction & r & \multicolumn{4}{|c|}{r} \\
+rca2 & 0.04s & 2.2e-05s & 8.3e-05s & 2.2e-04s & 4.5e-04s & 3 & 3\\
+adder16 & 0.03s & 1.5e-04s & 6.4e-04s & 1.75e-03s & 2.99e-03s & 16 & 16\\
+mult4 & 0.05 & 8.6e-05s & 4.7e-04s & 8.3e-04s & 1.8e-03s & 17 & 11\\
 \hline
 \end{tabular}
 Note: rca2 is a simple 2-bit ripple-carry adder, adder16 is a 16-bit adder, and mult4 is a 4-bit multiplier.
