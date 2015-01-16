@@ -87,18 +87,9 @@ In this example, each boolean function has equivalent outputs regardless of thei
 The proposed method has been implemented in the Galois Framework\cite{GALOIS} as a Galois application. To test our program, we first use ABC to load a verilog file using the read function and generate a structural hash using the strash function. This restructures the circuit into an AIG, which can then be exported back to verilog using write\_verilog and retain the AIG structure.  We can then invoke our program using gaig filename numthreads to run the AIG rewriting heuristic on the circuit as described in Section 3. \\\indent
 Both ABC and our program have built-in timing functions to report the runtime of the algorithm. A few sample runtimes are reported in Table 1.
 
-\section{Conclusion}
-Early results are promising, showing that the Galois Framework can be used effectively as a platform to produce a fast, parallelized implementation of the AIG Rewriting heuristic. This is in spite of the fact that our test cases show reduced performance when moving to multiple threads over a single thread, but even then we are still faster than ABC. Such performance reduction is likely a result of the extra overhead incurred by the Galois Framework in determining how to parallelize the graph algorithm execution and in the case of relatively small test cases the extra overhead outweighs the performance improvement of moving to multiple threads. For very large AIGs we would likely see a major performance increase.
-\subsection{Further Work}
-The first step for anyone wishing to continue this work would be to flesh out the heuristic, adding many more cases beyond XNOR to XOR to cover all common cuts and their substitutions.\\\indent
-To improve compatibility of this system with existing AIG software, native support for one of the binary AIG file formats could be implemented. This would also increase the read/write performance of the program with very large AIGs.\\\indent
-Another related project that may be valuable would be to implement this same parallelization process for the algorithm on a many-core system (such as a GPU) instead of with the Galois Framework.
-\bibliographystyle{acm}
-\bibliography{bibfile}
-\onecolumn
-\begin {table}[T]
-\caption {Runtimes} \label{tab:title}
-\begin{center}
+\begin {table*}[t]
+\label{tab:title}
+\centering
 \begin{tabular}{ |p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{2cm}|p{1cm}|p{1cm}| }
 \hline
 \multicolumn{6}{|c|}{Algorithm runtimes (averaged over 10 iterations)} & \multicolumn{2}{|c|}{Node Reduction}\\
@@ -110,8 +101,18 @@ adder16 & 0.03s & 1.5e-04s & 6.4e-04s & 1.75e-03s & 2.99e-03s & 16 & 16\\
 mult4 & 0.05 & 8.6e-05s & 4.7e-04s & 8.3e-04s & 1.8e-03s & 17 & 11\\
 \hline
 \end{tabular}
-Note: rca2 is a simple 2-bit ripple-carry adder, adder16 is a 16-bit adder, and mult4 is a 4-bit multiplier.
-\end{center}
-\end{table}
+\caption{Runtimes. rca2 is a simple 2-bit ripple-carry adder, adder16 is a 16-bit adder, and mult4 is a 4-bit multiplier.}
+\end{table*}
+
+\section{Conclusion}
+Early results are promising, showing that the Galois Framework can be used effectively as a platform to produce a fast, parallelized implementation of the AIG Rewriting heuristic. This is in spite of the fact that our test cases show reduced performance when moving to multiple threads over a single thread, but even then we are still faster than ABC. Such performance reduction is likely a result of the extra overhead incurred by the Galois Framework in determining how to parallelize the graph algorithm execution and in the case of relatively small test cases the extra overhead outweighs the performance improvement of moving to multiple threads. For very large AIGs we would likely see a major performance increase.
+
+\subsection{Further Work}
+The first step for anyone wishing to continue this work would be to flesh out the heuristic, adding many more cases beyond XNOR to XOR to cover all common cuts and their substitutions.\\\indent
+To improve compatibility of this system with existing AIG software, native support for one of the binary AIG file formats could be implemented. This would also increase the read/write performance of the program with very large AIGs.\\\indent
+Another related project that may be valuable would be to implement this same parallelization process for the algorithm on a many-core system (such as a GPU) instead of with the Galois Framework.
+\bibliographystyle{acm}
+\bibliography{bibfile}
+
 \end{document}
 
