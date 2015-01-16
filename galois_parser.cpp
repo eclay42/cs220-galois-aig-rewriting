@@ -616,9 +616,10 @@ struct Process {
 
 
 int main(int argc, char *argv[]) {
-	Galois::StatManager statManager;
+	//Galois::StatManager statManager;
 	unordered_map <string, int> map;
 	priority_queue<Graph::GraphNode, vector<Graph::GraphNode>, CompareNodelevel> pq;
+	Galois::Timer t;
 	
 	if ( argc != 3 ){
     	cout<<"usage: "<< argv[0] <<" <filename> <Num of Threads>\n";
@@ -672,6 +673,7 @@ int main(int argc, char *argv[]) {
 */
 
 	clock_t cstart = clock();
+	t.start();
 	clock_t cend = 0;
 	int level=2;
 	vector<Graph::GraphNode> temp;
@@ -705,6 +707,7 @@ int main(int argc, char *argv[]) {
 		//cout<<"Before level increment:"<<g.getData(pq.top()).level<<endl;
 		level++;
     	}
+	t.stop();
 	cend = clock();	
 
 	//cout << "Printing reduced graph \n";
@@ -732,8 +735,8 @@ int main(int argc, char *argv[]) {
  	}
  	*/
 	cout << "Number of nodes after: " << g.size() << '\n';
-	cout<<"Algorithm execution time: "<<(((double)cend - (double)cstart)/CLOCKS_PER_SEC)<<endl;
-	cout<<"Number of nodes reduced: "<< refactor_cost<<endl;
+	cout<<"Algorithm execution time: "<<t.get()<<" msec"<<endl;
+	cout<<"Number of nodes reduced: "<<refactor_cost<<endl;
 
 	return 0;
 }
