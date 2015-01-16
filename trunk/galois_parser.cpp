@@ -115,7 +115,7 @@ void parseInput(unordered_map <string, int> &map, unsigned i){
 		  n.type = pi;
 		  n.level = 0;
 		  size_t semic = fields[i].find_first_of(";");
-		  size_t comma = fields[i].find_first_of(";");
+		  size_t comma = fields[i].find_first_of(",");
 		  if (semic != string::npos){
 		    n.label_type = fields[i].substr(0,fields[i].length()-1);
 			  //remove last char b/c its ',' or ';'
@@ -410,7 +410,6 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 			Node n;
 			if(fields[0].compare("input") == 0){
 				parseInput(map, 1);
-				cout << "f1 " << fields[1] <<"f2 " << fields[2] <<"f3 " << fields[3] <<"f4 " << fields[4] <<'\n';
 				previous = "input";
 			}
 			else if(fields[0].compare("output") == 0){
@@ -484,26 +483,30 @@ void make_replacement(Graph::GraphNode node, Graph::GraphNode match_node){
 	g.removeNode(match_node);
 }
 
-/*Checking whether the cut represents an xnor gate */
+//*Checking whether the cut represents an xnor gate */
 bool checkxnor(Graph::GraphNode node){
 	Graph::GraphNode inode1=NULL,inode2=NULL;
 	Graph::GraphNode input1=NULL,input2=NULL,input3=NULL,input4=NULL;
-	cout <<"top node "<< g.getData(node).label_type << "\n";
+
 	getChildren(node,inode1,inode2);
-	if(g.getData(inode1).level ==0 || g.getData(inode1).level == 0){
-		//cout << "inode lvl 0\n";
+
+	if(inode1 == NULL || inode2 == NULL)
 		return false;
-	}
-	//cout<<" inode2:"<<g.getData(inode2).label_type<<endl;
+
+	if(g.getData(inode1).level == 0 || g.getData(inode2).level == 0)
+		return false;
+	//cout<<g.getData(inode1).label_type<<" "<<g.getData(inode2).label_type<<endl;
 	getChildren(inode1, input1, input2);
 	getChildren(inode2, input3, input4);
 
-
-	cout << " got children\n";
-	//cout <<"node "<< g.getData(node).label_type << "\n";
+	if(input1 == NULL || input2 == NULL || input3 == NULL || input4 == NULL)
+		return false;
+	/*
+	cout << "got children\n";
+	cout <<"node "<< g.getData(node).label_type << "\n";
 	cout <<"child1 "<< g.getData(inode1).label_type << "\n";
 	cout <<"child2 "<< g.getData(inode2).label_type << "\n";
-
+	*/
 
 	if(g.getEdgeData(g.findEdge(inode1,node))==2 && g.getEdgeData(g.findEdge(inode2,node))==2){
 		if(isEqualNodes(input1,input3)&&isEqualNodes(input2,input4)){
@@ -671,10 +674,10 @@ int main(int argc, char *argv[]) {
 			temp.push_back(pq.top());
 			pq.pop();
 			if(pq.empty()){
-				cout << "empty\n";
+				//cout << "empty\n";
 				break;
 			}
-			cout<<"Next Node inside level "<<level<<" : "<<g.getData(pq.top()).label_type<<" next lvl: "<<g.getData(pq.top()).level<<'\n';
+			//cout<<"Next Node inside level "<<level<<" : "<<g.getData(pq.top()).label_type<<" next lvl: "<<g.getData(pq.top()).level<<'\n';
 		}
 		//cout << "\noutside 2nd while\n";
 		//cout<<"Temp size:"<<temp.size()<<endl;
