@@ -109,8 +109,9 @@ bool find_cut(Graph::GraphNode &top,Graph::GraphNode &child_left,Graph::GraphNod
 }
 
 void parseInput(unordered_map <string, int> &map, unsigned i){
-	Node n;
+	//Node n;
 	for(i;i<fields.size();i++){
+		Node n;
 		if(fields[i].size()>1){
 		  n.type = pi;
 		  n.level = 0;
@@ -153,8 +154,9 @@ void parseInput(unordered_map <string, int> &map, unsigned i){
 }
 
 void parseOutput(unordered_map <string, int> &map, unsigned i){
-	Node n, output;
+	//Node n;
 	for(i ;i<fields.size();i++){
+		Node n;
 		if(fields[i].size()>1){
 			n.type = pi;
 			n.level = 0;
@@ -195,8 +197,9 @@ void parseOutput(unordered_map <string, int> &map, unsigned i){
 }
 
 void parseWire(unordered_map <string, int> &map, unsigned i){
-	Node n;
+	//Node n;
 	for(i;i<fields.size();i++){
+		Node n;
 		if(fields[i].size()>1){
 			n.type = nd;
 			n.level = -2;
@@ -278,17 +281,13 @@ void parseAssign(unordered_map <string, int> &map){
 				//map[string] returns node index to find which node
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 2;//
 				level1 = g.getData(gnodes[map[f3]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-								gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f1]], gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 			else{
 				g.getEdgeData(g.addEdge(gnodes[map[f3]],gnodes[map[f1]])) = 1;
 				level1 = g.getData(gnodes[map[f3]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-								gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
-
+				g.getEdgeData(g.addEdge(gnodes[map[f1]], gnodes[map[f3]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
-
 			invert = f5.find_first_of("~");
 			if (invert != string::npos){
 				f5 = f5.substr(1,f5.length());
@@ -296,15 +295,13 @@ void parseAssign(unordered_map <string, int> &map){
 				//cout <<fields[5] << " substr"<<fields[5].substr(1,fields[5].length()-1)<<" "<<map[fields[5].substr(1,fields[5].length()-1)]<< " "<< nodes[map[fields[5].substr(1,fields[5].length()-1)]].label_type <<endl;
 				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 2;
 				level2 = g.getData(gnodes[map[f5]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f1]], gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 			else{
 				f5 = f5.substr(0,f5.length());
 				g.getEdgeData(g.addEdge(gnodes[map[f5]],gnodes[map[f1]])) = 1;
 				level2 = g.getData(gnodes[map[f5]]).level;
-				g.getEdgeData(g.addEdge(gnodes[map[f1]],
-						  gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
+				g.getEdgeData(g.addEdge(gnodes[map[f1]], gnodes[map[f5]])) = 3;// Back edges to determine fanins -> wt. = 3
 			}
 		}
 		//dealing with space after f1 and no '&' or '|'
@@ -407,7 +404,7 @@ void parseFileintoGraph(string inFile, unordered_map <string, int> &map){
 			getline(fin,line);
 			trim(line);
 			split(fields, line, is_any_of(" "),token_compress_on);
-			Node n;
+			//Node n;
 			if(fields[0].compare("input") == 0){
 				parseInput(map, 1);
 				previous = "input";
@@ -490,8 +487,15 @@ bool checkxnor(Graph::GraphNode node){
 
 	getChildren(node,inode1,inode2);
 
-	if(inode1 == NULL || inode2 == NULL)
+	if(inode1 == NULL || inode2 == NULL){
+		/*if(inode1 != NULL){
+			//cout <<"parent: "<<g.getData(node).label_type<<" inode1: "<<g.getData(inode1).label_type<< "\n";
+		}
+		if(inode2 != NULL){
+			//cout <<"parent: "<<g.getData(node).label_type<<" inode2: "<<g.getData(inode2).label_type<< "\n";
+		}*/
 		return false;
+	}
 
 	if(g.getData(inode1).level == 0 || g.getData(inode2).level == 0)
 		return false;
@@ -587,16 +591,14 @@ void convertxor_cost(Graph::GraphNode node){
 	}
 }
 
-#if 0
+#if 1
 struct Process { 
 	void operator()(Graph::GraphNode src, Galois::UserContext<Graph::GraphNode>& ctx) {  
-		//mutex.lock();
 		//cout<<"Node in process:"<<g.getData(src).label_type<<" "<<"Level:"<<g.getData(src).level<<endl;
 		if(checkxnor(src)){
 			//cout << "true\n";
 			convertxor_cost(src);
 		}
-		//mutex.unlock();	
 	}
 };
 #else
@@ -622,9 +624,10 @@ int main(int argc, char *argv[]) {
     	cout<<"usage: "<< argv[0] <<" <filename> <Num of Threads>\n";
 		return 0;
 	}
-  cout << "Parsing file " << argv[1] << endl;
+    cout << "Parsing file " << argv[1] << '\n';
   	parseFileintoGraph(argv[1],map);
-  cout << "Successfully parsed file" << endl;
+    cout << "Successfully parsed file" << '\n';
+    cout << "Number nodes: " << g.size()<< '\n';
 	unsigned int numThreads = atoi(argv[2]);
 	numThreads = Galois::setActiveThreads(numThreads);
 
@@ -643,16 +646,22 @@ int main(int argc, char *argv[]) {
  	//}
 	/*print 1 node */
 /*
-	cout << " n175037, level: "<<g.getData(gnodes[map[" n175037,"]]).level<<'\n';
+	cout << "n47806 level: "<<g.getData(gnodes[map["n47806"]]).level<<'\n';
 	Graph::GraphNode c1,c2;
-	getChildren(gnodes[map[" n175037,"]],c1,c2);
+	getChildren(gnodes[map["n47806"]],c1,c2);
+	cout << g.getData(c1).label_type <<" level: "<<g.getData(c1).level<<'\n';
+	cout << g.getData(c2).label_type <<" level: "<<g.getData(c2).level<<'\n';
+
+	cout << "n47808 level: "<<g.getData(gnodes[map["n47808"]]).level<<'\n';
+	//Graph::GraphNode c1,c2;
+	getChildren(gnodes[map["n47808"]],c1,c2);
 	cout << g.getData(c1).label_type <<" level: "<<g.getData(c1).level<<'\n';
 	cout << g.getData(c2).label_type <<" level: "<<g.getData(c2).level<<'\n';
 */
-	/*
-	for (Graph::edge_iterator edge : g.out_edges(gnodes[map["n32196"]])) {
+/*
+	for (Graph::edge_iterator edge : g.out_edges(gnodes[map["n102277"]])) {
 		Graph::GraphNode dst = g.getEdgeDst(edge);
-			cout <<"\n dest: "<< g.getData(dst).label_type << " level: " <<g.getData(dst).level;
+			cout <<"\nn102277 dest: "<< g.getData(dst).label_type << " level: " <<g.getData(dst).level;
 			int edgeData = g.getEdgeData(edge);
 			//Not printing the back edges which is used for accessing children
 		if(edgeData != 3){
@@ -660,7 +669,7 @@ int main(int argc, char *argv[]) {
 			cout<<" edge data: "<< edgeData <<'\n';
 		}
 	}
-	*/
+*/
 
 	clock_t cstart = clock();
 	clock_t cend = 0;
@@ -686,7 +695,7 @@ int main(int argc, char *argv[]) {
 		for (unsigned i=0; i<temp.size(); ++i)
 			std::cout <<"Node in temp vector:"<< g.getData(temp[i]).label_type<<endl;
 		*/
-		#if 0
+		#if 1
         		Galois::for_each(temp.begin(),temp.end(),Process());
 		#else
         		Galois::do_all(temp.begin(),temp.end(), Process(),Galois::loopname(""));
@@ -698,7 +707,7 @@ int main(int argc, char *argv[]) {
     	}
 	cend = clock();	
 
-	cout << "Printing reduced graph \n";
+	//cout << "Printing reduced graph \n";
 	//Print graph after refactoring of nodes
 	/*
 	for ( Graph::GraphNode src : g){
@@ -722,7 +731,7 @@ int main(int argc, char *argv[]) {
 		cout <<endl;
  	}
  	*/
-
+	cout << "Number of nodes after: " << g.size() << '\n';
 	cout<<"Algorithm execution time: "<<(((double)cend - (double)cstart)/CLOCKS_PER_SEC)<<endl;
 	cout<<"Number of nodes reduced: "<< refactor_cost<<endl;
 
