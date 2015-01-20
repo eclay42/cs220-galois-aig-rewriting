@@ -475,7 +475,7 @@ bool make_replacement(Graph::GraphNode node, Graph::GraphNode match_node){
 	g.removeEdge(child1,g.findEdge(child1,match_node));
 	g.removeEdge(child2,g.findEdge(child2,match_node));
 	g.removeNode(match_node);
-	cout<<"Node: label "<<g.getData(node).label_type<<"level: "<<g.getData(node).level<<"Match Node: label "<<g.getData(match_node).label_type<<"level: "<<g.getData(match_node).level<<endl;
+	//cout<<"Node: label "<<g.getData(node).label_type<<"level: "<<g.getData(node).level<<"Match Node: label "<<g.getData(match_node).label_type<<"level: "<<g.getData(match_node).level<<endl;
 	return true;
 }
 
