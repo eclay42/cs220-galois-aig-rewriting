@@ -1,0 +1,1 @@
+Rewriting algorithm for Galois.
